@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -23,48 +24,74 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         }
 
         [Test]
-        public async Task Scenario()
+        public async Task Scenarios()
         {
             var stocks = new[]
             {
-                new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10 },
-                new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-            };
-
-            var symbols = stocks.Select(s => s.Symbol).ToList();
-
-            var portfolio = new Portfolio
-            {
-                Allocations = stocks.Select(s => new StockAllocation
+                new[]
                 {
-                    Symbol = s.Symbol,
-                    AllocationType = s.Type,
-                    AllocationAmount = s.DesiredAmount
-                }).ToList()
-            };
-            
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                },
+                new[]
+                {
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                },
+                new[]
+                {
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                },
+                new[]
+                {
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                }
+            }.ToList();
+
+            var symbols = new List<string> { "SPY", "QQQ", "DIA", "BND" };
+
             var relevantPeriods = await _alphaClient.GetPortfolioHistory(symbols);
 
-            RunScenarioDataSet dataSet = new RunScenarioDataSet
+            foreach (var stockSet in stocks)
             {
-                InitialInvestment = 10000,
-                CashInfluxAmount = 150,
-                CashInfluxCadence = CadenceTypeEnum.Weekly,
-                Portfolio = portfolio,
-                History = relevantPeriods
-            };
+                var portfolio = new Portfolio
+                {
+                    Allocations = stockSet.Select(s => new StockAllocation
+                    {
+                        Symbol = s.Symbol,
+                        AllocationType = s.Type,
+                        AllocationAmount = s.DesiredAmount
+                    }).ToList()
+                };
 
-            var result = await _rebalanceLogic.RunScenario(dataSet);
+                RunScenarioDataSet dataSet = new RunScenarioDataSet
+                {
+                    InitialInvestment = 10000,
+                    CashInfluxAmount = 150,
+                    CashInfluxCadence = CadenceTypeEnum.Weekly,
+                    Portfolio = portfolio,
+                    History = relevantPeriods
+                };
 
-            //foreach (var action in result.Actions)
-            //{
-            //    Console.WriteLine($"{action.ActionType} {action.Amount} shares of {action.Symbol}");
-            //}
-            //
-            Console.WriteLine($"Portfolio grew by {result.PercentIncrease * 100} percent from {result.StartDate.ToShortDateString()} to {result.EndDate.ToShortDateString()}");
+                var result = await _rebalanceLogic.RunScenario(dataSet);
+
+                //foreach (var action in result.Actions)
+                //{
+                //    Console.WriteLine($"{action.ActionType} {action.Amount} shares of {action.Symbol}");
+                //}
+                //
+                Console.WriteLine($"Portfolio {stocks.IndexOf(stockSet)} grew by {result.PercentIncrease * 100} percent from {result.StartDate.ToShortDateString()} to {result.EndDate.ToShortDateString()}");
+            }
         }
 
         [Test]
