@@ -55,6 +55,23 @@ namespace PortfolioTracker.Origin.AlphaClient
             }).ToList();
         }
 
+        public async Task<List<PortfolioHistoryPeriod>> GetPortfolioHistory(List<string> symbols)
+        {
+            var stockHistories = await GetHistory(symbols);
+
+            var periods = stockHistories.SelectMany(h => h.History).Select(h => h.ClosingDate.Date).Distinct().ToList();
+
+            return periods.Select(p => new PortfolioHistoryPeriod
+            {
+                ClosingDate = p,
+                Stocks = stockHistories.Select(s => new StockHistoricalPeriod
+                {
+                    Symbol = s.Symbol,
+                    PeriodData = s.History.Find(h => h.ClosingDate.Date.Equals(p))
+                }).Where(s => s.PeriodData != null).ToList()
+            }).Where(p => p.Stocks.Count == symbols.Count).OrderBy(p => p.ClosingDate).ToList();
+        }
+
         public async Task<List<Quote>> GetQuotes(List<string> symbols)
         {
             var quotes = await Client.RequestBatchQuotesAsync(symbols.ToArray());
@@ -66,5 +83,17 @@ namespace PortfolioTracker.Origin.AlphaClient
                 Volume = q.Volume ?? 0
             }).ToList();
         }
+    }
+
+    public class StockHistoricalPeriod
+    {
+        public string Symbol { get; set; }
+        public StockHistoryItem PeriodData { get; set; }
+    }
+
+    public class PortfolioHistoryPeriod
+    {
+        public DateTime ClosingDate { get; set; }
+        public List<StockHistoricalPeriod> Stocks { get; set; }
     }
 }

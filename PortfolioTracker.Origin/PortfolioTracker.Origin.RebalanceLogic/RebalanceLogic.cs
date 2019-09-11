@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PortfolioTracker.Origin.AlphaClient;
-using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
@@ -13,6 +12,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
     public class RunScenarioDataSet
     {
         public Portfolio Portfolio { get; set; }
+        public List<PortfolioHistoryPeriod> History { get; set; }
         public decimal InitialInvestment { get; set; }
 
         public CadenceTypeEnum CashInfluxCadence { get; set; }
@@ -21,32 +21,12 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
     public class RebalanceLogic
     {
-        private readonly IAlphaClient _alphaClient;
-
-        public RebalanceLogic(IAlphaClient alphaClient)
-        {
-            _alphaClient = alphaClient;
-        }
-
         public async Task<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
         {
             if (dataSet.CashInfluxCadence != CadenceTypeEnum.Weekly)
                 throw new Exception($"{dataSet.CashInfluxCadence} cadence not yet supported.");
 
             var symbols = dataSet.Portfolio.Allocations.Select(a => a.Symbol).ToList();
-            var stockHistories = await _alphaClient.GetHistory(symbols);
-
-            var periods = stockHistories.SelectMany(h => h.History).Select(h => h.ClosingDate.Date).Distinct().ToList();
-
-            var relevantPeriods = periods.Select(p => new
-            {
-                ClosingDate = p,
-                Stocks = stockHistories.Select(s => new
-                {
-                    s.Symbol,
-                    PeriodData = s.History.Find(h => h.ClosingDate.Date.Equals(p))
-                }).Where(s => s.PeriodData != null).ToList()
-            }).Where(p => p.Stocks.Count == symbols.Count).OrderBy(p => p.ClosingDate).ToList();
 
             var currentAllocations = symbols.Select(s => new StockAllocation
             {
@@ -56,7 +36,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             }).ToList();
 
             decimal cashOnHand = dataSet.InitialInvestment;
-            foreach (var period in relevantPeriods)
+            foreach (var period in dataSet.History)
             {
                 var quotes = period.Stocks.Select(s => new Quote
                 {
@@ -89,17 +69,17 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             }
 
             decimal finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
-            var lastPeriod = relevantPeriods.Last();
+            var lastPeriod = dataSet.History.Last();
 
             foreach (var allocation in currentAllocations)
                 finalPortfolioValue += allocation.AllocationAmount * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
 
-            var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (relevantPeriods.Count - 1));
+            var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (dataSet.History.Count - 1));
             return new ScenarioResult
             {
                 PercentIncrease = finalPortfolioValue / totalCashInvested,
-                StartDate = relevantPeriods.First().ClosingDate,
-                EndDate = relevantPeriods.Last().ClosingDate,
+                StartDate = dataSet.History.First().ClosingDate,
+                EndDate = lastPeriod.ClosingDate,
                 FinalPortfolioValue = finalPortfolioValue,
                 TotalCashInvested = totalCashInvested
             };

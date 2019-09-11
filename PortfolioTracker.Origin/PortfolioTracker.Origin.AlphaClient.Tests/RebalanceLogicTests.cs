@@ -19,7 +19,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         public void Setup()
         {
             _alphaClient = new AlphaClient.AlphaClient(new ApiKeyProvider());
-            _rebalanceLogic = new RebalanceLogic(_alphaClient);
+            _rebalanceLogic = new RebalanceLogic();
         }
 
         [Test]
@@ -34,6 +34,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
             };
 
+            var symbols = stocks.Select(s => s.Symbol).ToList();
+
             var portfolio = new Portfolio
             {
                 Allocations = stocks.Select(s => new StockAllocation
@@ -43,13 +45,16 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     AllocationAmount = s.DesiredAmount
                 }).ToList()
             };
+            
+            var relevantPeriods = await _alphaClient.GetPortfolioHistory(symbols);
 
             RunScenarioDataSet dataSet = new RunScenarioDataSet
             {
                 InitialInvestment = 10000,
                 CashInfluxAmount = 150,
                 CashInfluxCadence = CadenceTypeEnum.Weekly,
-                Portfolio = portfolio
+                Portfolio = portfolio,
+                History = relevantPeriods
             };
 
             var result = await _rebalanceLogic.RunScenario(dataSet);
