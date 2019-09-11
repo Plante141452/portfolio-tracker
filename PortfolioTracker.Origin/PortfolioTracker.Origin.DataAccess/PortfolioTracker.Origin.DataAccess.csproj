@@ -6,6 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.9.1" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj" />
   </ItemGroup>
 
 </Project>

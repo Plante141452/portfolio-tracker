@@ -1,20 +1,23 @@
-﻿using MongoDB.Driver;
-using System;
+﻿using System;
+using MongoDB.Driver;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
 
 namespace PortfolioTracker.Origin.DataAccess
 {
-    public class MongoClientWrapper
+    public class MongoClientWrapper : IMongoClientWrapper
     {
-        private readonly IConnectionStringProvider _connectionStringProvider;
         private readonly Lazy<MongoClient> _mongoClientLazy;
 
-        public MongoClient MongoClient => _mongoClientLazy.Value;
+        private const string StockData = "STOCK_DATA";
+        private readonly Lazy<IMongoDatabase> _stockDatabaseLazy;
+        public IMongoDatabase StockDatabase => _stockDatabaseLazy.Value;
+
+        private MongoClient MongoClient => _mongoClientLazy.Value;
 
         public MongoClientWrapper(IConnectionStringProvider connectionStringProvider)
         {
-            _connectionStringProvider = connectionStringProvider;
-            _mongoClientLazy = new Lazy<MongoClient>(() => new MongoClient(_connectionStringProvider.ConnectionString));
+            _mongoClientLazy = new Lazy<MongoClient>(() => new MongoClient(connectionStringProvider.ConnectionString));
+            _stockDatabaseLazy = new Lazy<IMongoDatabase>(() => MongoClient.GetDatabase(StockData));
         }
     }
 }

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj" />
+    <ProjectReference Include="..\PortfolioTracker.Origin.DataAccess\PortfolioTracker.Origin.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

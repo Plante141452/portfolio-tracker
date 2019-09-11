@@ -6,6 +6,7 @@ using NUnit.Framework;
 using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
+using PortfolioTracker.Origin.DataAccess;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic.Tests
@@ -13,13 +14,15 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
     [TestFixture]
     public class RebalanceLogicTests
     {
-        private AlphaClient.AlphaClient _alphaClient;
+        private AlphaClientLogic _alphaClient;
         private RebalanceLogic _rebalanceLogic;
 
         [SetUp]
         public void Setup()
         {
-            _alphaClient = new AlphaClient.AlphaClient(new ApiKeyProvider());
+            var client = new AlphaClientWrapper(new ApiKeyProvider());
+            var stockDataAccess = new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider()));
+            _alphaClient = new AlphaClientLogic(client, stockDataAccess);
             _rebalanceLogic = new RebalanceLogic();
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PortfolioTracker.Origin.AlphaClient
+namespace PortfolioTracker.Origin.Common.Models
 {
     public class Quote
     {

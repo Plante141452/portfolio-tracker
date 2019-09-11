@@ -2,23 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic
 {
-    public class RunScenarioDataSet
-    {
-        public Portfolio Portfolio { get; set; }
-        public List<PortfolioHistoryPeriod> History { get; set; }
-        public decimal InitialInvestment { get; set; }
-
-        public CadenceTypeEnum CashInfluxCadence { get; set; }
-        public decimal CashInfluxAmount { get; set; }
-    }
-
     public class RebalanceLogic
     {
         public async Task<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
@@ -213,14 +202,5 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 Actions = actions
             };
         }
-    }
-
-    public class ScenarioResult
-    {
-        public decimal PercentIncrease { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal FinalPortfolioValue { get; set; }
-        public decimal TotalCashInvested { get; set; }
     }
 }

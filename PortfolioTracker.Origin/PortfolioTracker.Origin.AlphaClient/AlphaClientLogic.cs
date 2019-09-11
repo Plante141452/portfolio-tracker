@@ -3,56 +3,60 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks;
 using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
+using PortfolioTracker.Origin.DataAccess;
 
 namespace PortfolioTracker.Origin.AlphaClient
 {
-    public class AlphaClient : IAlphaClient
+    public class AlphaClientLogic : IAlphaClientLogic
     {
-        private readonly Lazy<AlphaVantageStocksClient> _clientLazy;
-        private readonly IApiKeyProvider _apiKeyProvider;
+        private IAlphaClientWrapper _alphaClient;
+        private readonly IStockDataAccess _stockData;
 
-        private AlphaVantageStocksClient Client => _clientLazy.Value;
-
-        public AlphaClient(IApiKeyProvider apiKeyProvider)
+        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IStockDataAccess stockData)
         {
-            _apiKeyProvider = apiKeyProvider;
-            _clientLazy = new Lazy<AlphaVantageStocksClient>(() => new AlphaVantageStocksClient(_apiKeyProvider.AlphaVantageKey));
+            _alphaClient = alphaClient;
+            _stockData = stockData;
         }
 
         public async Task<List<StockHistory>> GetHistory(List<string> symbols)
         {
-            ConcurrentQueue<StockTimeSeries> stockSeries = new ConcurrentQueue<StockTimeSeries>();
+            ConcurrentQueue<StockHistory> histories = new ConcurrentQueue<StockHistory>();
 
             await Task.WhenAll(symbols.Select(s => Task.Run(async () =>
             {
-                var data = await Client.RequestWeeklyTimeSeriesAsync(s, true);
-                stockSeries.Enqueue(data);
+                var existingData = await _stockData.GetHistory(s);
+                var lastRecordedClose = existingData?.History?.FirstOrDefault()?.ClosingDate;
+                if (lastRecordedClose != null && DateTime.Now.Subtract(lastRecordedClose.Value).TotalDays < 7)
+                    histories.Enqueue(existingData);
+                else
+                {
+                    var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
+                    var history = TransformSeries(data);
+                    histories.Enqueue(history);
+                    await _stockData.SaveHistory(history);
+                }
             })));
-            //foreach(var s in symbols)
-            //{
-            //    var data = await Client.RequestWeeklyTimeSeriesAsync(s, true);
-            //    stockSeries.Enqueue(data);
-            //}
 
-            return stockSeries.Select(series => new
-            {
-                series.Symbol,
-                History = series.DataPoints.ToList()
-            }).Select(series => new StockHistory
+            return histories.ToList();
+        }
+
+        private StockHistory TransformSeries(StockTimeSeries series)
+        {
+            var history = series.DataPoints.ToList();
+            return new StockHistory
             {
                 Symbol = series.Symbol,
-                History = series.History.Select((dp, i) => new StockHistoryItem
+                History = history.Select((dp, i) => new StockHistoryItem
                 {
                     ClosingDate = dp.Time,
                     Volume = dp.Volume,
                     AdjustedClose = dp.ClosingPrice,
-                    AdjustedPercentChanged = i == 0 ? 0 : dp.ClosingPrice / series.History[i - 1].ClosingPrice
+                    AdjustedPercentChanged = i == 0 ? 0 : dp.ClosingPrice / history[i - 1].ClosingPrice
                 }).ToList()
-            }).ToList();
+            };
         }
 
         public async Task<List<PortfolioHistoryPeriod>> GetPortfolioHistory(List<string> symbols)
@@ -74,7 +78,7 @@ namespace PortfolioTracker.Origin.AlphaClient
 
         public async Task<List<Quote>> GetQuotes(List<string> symbols)
         {
-            var quotes = await Client.RequestBatchQuotesAsync(symbols.ToArray());
+            var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbols.ToArray()));
             return quotes.Select(q => new Quote
             {
                 Symbol = q.Symbol,
@@ -83,17 +87,5 @@ namespace PortfolioTracker.Origin.AlphaClient
                 Volume = q.Volume ?? 0
             }).ToList();
         }
-    }
-
-    public class StockHistoricalPeriod
-    {
-        public string Symbol { get; set; }
-        public StockHistoryItem PeriodData { get; set; }
-    }
-
-    public class PortfolioHistoryPeriod
-    {
-        public DateTime ClosingDate { get; set; }
-        public List<StockHistoricalPeriod> Stocks { get; set; }
     }
 }

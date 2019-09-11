@@ -46,6 +46,8 @@
     <Compile Include="Models\RebalancePercentageItem.cs" />
     <Compile Include="Models\RebalanceResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Models\RunScenarioDataSet.cs" />
+    <Compile Include="Models\ScenarioResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PortfolioTracker.Origin.AlphaClient\PortfolioTracker.Origin.AlphaClient.csproj">
