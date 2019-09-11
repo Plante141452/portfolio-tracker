@@ -32,6 +32,11 @@ namespace PortfolioTracker.Origin.AlphaClient
                 var data = await Client.RequestWeeklyTimeSeriesAsync(s, true);
                 stockSeries.Enqueue(data);
             })));
+            //foreach(var s in symbols)
+            //{
+            //    var data = await Client.RequestWeeklyTimeSeriesAsync(s, true);
+            //    stockSeries.Enqueue(data);
+            //}
 
             return stockSeries.Select(series => new
             {
@@ -43,6 +48,7 @@ namespace PortfolioTracker.Origin.AlphaClient
                 History = series.History.Select((dp, i) => new StockHistoryItem
                 {
                     ClosingDate = dp.Time,
+                    Volume = dp.Volume,
                     AdjustedClose = dp.ClosingPrice,
                     AdjustedPercentChanged = i == 0 ? 0 : dp.ClosingPrice / series.History[i - 1].ClosingPrice
                 }).ToList()

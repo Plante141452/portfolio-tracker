@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
@@ -9,6 +10,15 @@ using PortfolioTracker.Origin.RebalanceLogic.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic
 {
+    public class RunScenarioDataSet
+    {
+        public Portfolio Portfolio { get; set; }
+        public decimal InitialInvestment { get; set; }
+
+        public CadenceTypeEnum CashInfluxCadence { get; set; }
+        public decimal CashInfluxAmount { get; set; }
+    }
+
     public class RebalanceLogic
     {
         private readonly IAlphaClient _alphaClient;
@@ -18,25 +28,93 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             _alphaClient = alphaClient;
         }
 
-        public async Task RunScenario()
+        public async Task<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
         {
-            Portfolio portfolio;
+            if (dataSet.CashInfluxCadence != CadenceTypeEnum.Weekly)
+                throw new Exception($"{dataSet.CashInfluxCadence} cadence not yet supported.");
+
+            var symbols = dataSet.Portfolio.Allocations.Select(a => a.Symbol).ToList();
+            var stockHistories = await _alphaClient.GetHistory(symbols);
+
+            var periods = stockHistories.SelectMany(h => h.History).Select(h => h.ClosingDate.Date).Distinct().ToList();
+
+            var relevantPeriods = periods.Select(p => new
+            {
+                ClosingDate = p,
+                Stocks = stockHistories.Select(s => new
+                {
+                    s.Symbol,
+                    PeriodData = s.History.Find(h => h.ClosingDate.Date.Equals(p))
+                }).Where(s => s.PeriodData != null).ToList()
+            }).Where(p => p.Stocks.Count == symbols.Count).OrderBy(p => p.ClosingDate).ToList();
+
+            var currentAllocations = symbols.Select(s => new StockAllocation
+            {
+                Symbol = s,
+                AllocationAmount = 0,
+                AllocationType = AllocationTypeEnum.StockAmount
+            }).ToList();
+
+            decimal cashOnHand = dataSet.InitialInvestment;
+            foreach (var period in relevantPeriods)
+            {
+                var quotes = period.Stocks.Select(s => new Quote
+                {
+                    Symbol = s.Symbol,
+                    Price = s.PeriodData.AdjustedClose,
+                    Time = period.ClosingDate,
+                    Volume = s.PeriodData.Volume
+                }).ToList();
+
+                var rebalanceDataSet = new RebalanceDataSet
+                {
+                    ActualAllocations = currentAllocations,
+                    CashOnHand = cashOnHand,
+                    Portfolio = dataSet.Portfolio,
+                    Quotes = quotes
+                };
+
+                var rebalanceResult = Rebalance(rebalanceDataSet);
+
+                cashOnHand = rebalanceResult.RemainingCashOnHand + dataSet.CashInfluxAmount;
+
+                foreach (var action in rebalanceResult.Actions)
+                {
+                    var actualAllocation = currentAllocations.Find(a => a.Symbol == action.Symbol);
+                    if (action.ActionType == RebalanceActionTypeEnum.Buy)
+                        actualAllocation.AllocationAmount += action.Amount;
+                    else
+                        actualAllocation.AllocationAmount -= action.Amount;
+                }
+            }
+
+            decimal finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
+            var lastPeriod = relevantPeriods.Last();
+
+            foreach (var allocation in currentAllocations)
+                finalPortfolioValue += allocation.AllocationAmount * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
+
+            var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (relevantPeriods.Count - 1));
+            return new ScenarioResult
+            {
+                PercentIncrease = finalPortfolioValue / totalCashInvested,
+                StartDate = relevantPeriods.First().ClosingDate,
+                EndDate = relevantPeriods.Last().ClosingDate,
+                FinalPortfolioValue = finalPortfolioValue,
+                TotalCashInvested = totalCashInvested
+            };
         }
 
-        public async Task<RebalanceResult> Rebalance(RebalanceDataSet dataSet)
+        public RebalanceResult Rebalance(RebalanceDataSet dataSet)
         {
             if (dataSet.ActualAllocations.Any(a => a.AllocationType != AllocationTypeEnum.StockAmount))
                 throw new Exception("Actual allocation amounts must be of stock amount type when rebalancing.");
-
-            var symbols = dataSet.Portfolio.Allocations.Select(a => a.Symbol).ToList();
-
-            var quotes = await _alphaClient.GetQuotes(symbols);
 
             var stocks = dataSet.Portfolio.Allocations.Select(a => new RebalanceItem
             {
                 DesiredAllocation = a,
                 ActualAllocation = dataSet.ActualAllocations.First(aa => string.Equals(aa.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)),
-                Price = quotes.First(q => string.Equals(q.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)).Price
+                Price = dataSet.Quotes.First(q => string.Equals(q.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)).Price
             }).ToList();
 
             var portfolioValue = dataSet.CashOnHand + stocks.Sum(s => s.ActualAllocation.AllocationAmount * s.Price);
@@ -90,7 +168,6 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             var percentageStocks = stocks.Where(s => s.DesiredAllocation.AllocationType == AllocationTypeEnum.Percentage).ToList();
             var idealTotalFactor = percentageStocks.Sum(s => s.DesiredAllocation.AllocationAmount);
-            var currentTotalAmount = percentageStocks.Sum(s => s.ActualAllocation.AllocationAmount * s.Price);
 
             var factors = percentageStocks.Select(s => new
             {
@@ -156,5 +233,14 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 Actions = actions
             };
         }
+    }
+
+    public class ScenarioResult
+    {
+        public decimal PercentIncrease { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public decimal FinalPortfolioValue { get; set; }
+        public decimal TotalCashInvested { get; set; }
     }
 }

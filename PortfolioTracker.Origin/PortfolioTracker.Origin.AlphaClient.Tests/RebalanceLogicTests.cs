@@ -12,12 +12,54 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
     [TestFixture]
     public class RebalanceLogicTests
     {
+        private AlphaClient.AlphaClient _alphaClient;
         private RebalanceLogic _rebalanceLogic;
 
         [SetUp]
         public void Setup()
         {
-            _rebalanceLogic = new RebalanceLogic(new AlphaClient.AlphaClient(new ApiKeyProvider()));
+            _alphaClient = new AlphaClient.AlphaClient(new ApiKeyProvider());
+            _rebalanceLogic = new RebalanceLogic(_alphaClient);
+        }
+
+        [Test]
+        public async Task Scenario()
+        {
+            var stocks = new[]
+            {
+                new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+                new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10 },
+                new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
+                new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
+            };
+
+            var portfolio = new Portfolio
+            {
+                Allocations = stocks.Select(s => new StockAllocation
+                {
+                    Symbol = s.Symbol,
+                    AllocationType = s.Type,
+                    AllocationAmount = s.DesiredAmount
+                }).ToList()
+            };
+
+            RunScenarioDataSet dataSet = new RunScenarioDataSet
+            {
+                InitialInvestment = 10000,
+                CashInfluxAmount = 150,
+                CashInfluxCadence = CadenceTypeEnum.Weekly,
+                Portfolio = portfolio
+            };
+
+            var result = await _rebalanceLogic.RunScenario(dataSet);
+
+            //foreach (var action in result.Actions)
+            //{
+            //    Console.WriteLine($"{action.ActionType} {action.Amount} shares of {action.Symbol}");
+            //}
+            //
+            Console.WriteLine($"Portfolio grew by {result.PercentIncrease * 100} percent from {result.StartDate.ToShortDateString()} to {result.EndDate.ToShortDateString()}");
         }
 
         [Test]
@@ -65,14 +107,18 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 }).ToList()
             };
 
+            var symbols = stocks.Select(s => s.Symbol).ToList();
+            var quotes = await _alphaClient.GetQuotes(symbols);
+
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
                 CashOnHand = 32.08m,
                 ActualAllocations = actualAllocations,
-                Portfolio = portfolio
+                Portfolio = portfolio,
+                Quotes = quotes
             };
 
-            var result = await _rebalanceLogic.Rebalance(dataSet);
+            var result = _rebalanceLogic.Rebalance(dataSet);
 
             foreach (var action in result.Actions)
             {
