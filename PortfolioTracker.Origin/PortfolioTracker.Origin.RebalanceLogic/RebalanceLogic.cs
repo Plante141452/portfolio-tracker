@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
+using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 
@@ -15,6 +16,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic
         public RebalanceLogic(IAlphaClient alphaClient)
         {
             _alphaClient = alphaClient;
+        }
+
+        public async Task RunScenario()
+        {
+            Portfolio portfolio;
         }
 
         public async Task<RebalanceResult> Rebalance(RebalanceDataSet dataSet)

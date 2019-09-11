@@ -8,4 +8,8 @@
     <PackageReference Include="AlphaVantage.Net.Stocks" Version="1.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj" />
+  </ItemGroup>
+
 </Project>

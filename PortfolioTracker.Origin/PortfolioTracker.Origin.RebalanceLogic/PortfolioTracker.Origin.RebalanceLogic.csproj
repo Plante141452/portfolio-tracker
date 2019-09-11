@@ -53,7 +53,7 @@
       <Name>PortfolioTracker.Origin.AlphaClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj">
-      <Project>{48832641-C7C5-484E-A4B0-78ECD2545833}</Project>
+      <Project>{E82488A7-F5D3-404F-8BB9-5E525DB52950}</Project>
       <Name>PortfolioTracker.Origin.Common.Models</Name>
     </ProjectReference>
   </ItemGroup>

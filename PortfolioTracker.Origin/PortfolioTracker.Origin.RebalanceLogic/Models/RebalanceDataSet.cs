@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic.Models
