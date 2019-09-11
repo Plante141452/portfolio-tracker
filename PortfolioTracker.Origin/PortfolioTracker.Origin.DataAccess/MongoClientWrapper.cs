@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using System;
+using PortfolioTracker.Origin.DataAccess.Interfaces;
 
 namespace PortfolioTracker.Origin.DataAccess
 {

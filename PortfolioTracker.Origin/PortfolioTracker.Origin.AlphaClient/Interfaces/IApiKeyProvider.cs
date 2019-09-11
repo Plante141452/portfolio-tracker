@@ -1,4 +1,4 @@
-﻿namespace PortfolioTracker.Origin.AlphaClient
+﻿namespace PortfolioTracker.Origin.AlphaClient.Interfaces
 {
     public interface IApiKeyProvider
     {

@@ -1,4 +1,4 @@
-﻿namespace PortfolioTracker.Origin.DataAccess
+﻿namespace PortfolioTracker.Origin.DataAccess.Interfaces
 {
     public interface IConnectionStringProvider
     {

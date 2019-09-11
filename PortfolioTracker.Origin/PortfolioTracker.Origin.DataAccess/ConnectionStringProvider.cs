@@ -1,4 +1,6 @@
-﻿namespace PortfolioTracker.Origin.DataAccess
+﻿using PortfolioTracker.Origin.DataAccess.Interfaces;
+
+namespace PortfolioTracker.Origin.DataAccess
 {
     public class ConnectionStringProvider : IConnectionStringProvider
     {
