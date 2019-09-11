@@ -113,8 +113,7 @@ namespace PortfolioTracker.Origin.AlphaClient
                 EndAmount = s.EndAmount
             }).ToList();
 
-            bool unableToFill = false;
-            while (!unableToFill)
+            while (true)
             {
                 var usedUpAmount = factors.Sum(f => f.Price * f.EndAmount);
                 var amountRemaining = portfolioValue - usedUpAmount;
@@ -122,10 +121,10 @@ namespace PortfolioTracker.Origin.AlphaClient
                 var factorsInPlay = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).ToList();
                 if (!factorsInPlay.Any())
                 {
-                    unableToFill = true;
                     break;
                 }
 
+                bool filled = false;
                 foreach (var factor in factorsInPlay)
                 {
                     var adjustedFactor = ((factor.EndAmount + 1) * factor.Price) / portfolioValue;
@@ -134,9 +133,13 @@ namespace PortfolioTracker.Origin.AlphaClient
                     {
                         factor.EndAmount += 1;
                         factor.CurrentFactor = adjustedFactor;
+                        filled = true;
                         break;
                     }
                 }
+
+                if (!filled)
+                    break;
             }
 
             actions.AddRange(factors.Where(f => f.EndAmount != f.ActualAllocation.AllocationAmount).Select(f => new RebalanceAction

@@ -63,7 +63,7 @@ namespace PortfolioTracker.Origin.AlphaClient.Tests
 
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
-                CashOnHand = 86,
+                CashOnHand = 87.5m,
                 ActualAllocations = actualAllocations,
                 Portfolio = portfolio
             };
