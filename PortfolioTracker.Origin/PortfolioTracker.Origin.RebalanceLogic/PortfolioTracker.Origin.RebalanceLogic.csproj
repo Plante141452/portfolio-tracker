@@ -38,7 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlphaClient.cs" />
+    <Compile Include="RebalanceLogic.cs" />
     <Compile Include="Models\RebalanceAction.cs" />
     <Compile Include="Models\RebalanceActionTypeEnum.cs" />
     <Compile Include="Models\RebalanceDataSet.cs" />
