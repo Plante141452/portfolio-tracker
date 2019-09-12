@@ -214,33 +214,44 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 EndAmount = s.EndAmount
             }).ToList();
 
+            var usedUpAmount = factors.Sum(f => f.Price * f.EndAmount);
+
             while (true)
             {
-                var usedUpAmount = factors.Sum(f => f.Price * f.EndAmount);
                 var amountRemaining = portfolioValue - usedUpAmount;
 
-                var factorsInPlay = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).ToList();
-                if (!factorsInPlay.Any())
-                {
+                var mostExpensiveFactor = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault();
+                if (mostExpensiveFactor == null)
                     break;
-                }
 
-                bool filled = false;
-                foreach (var factor in factorsInPlay)
-                {
-                    var adjustedFactor = ((factor.EndAmount + 1) * factor.Price) / portfolioValue;
-                    var newDifference = Math.Abs(factor.DesiredFactor - adjustedFactor);
-                    if (factorsInPlay.Count == 1 || factorsInPlay.Any(f => f.FactorDifference > newDifference))
-                    {
-                        factor.EndAmount += 1;
-                        factor.CurrentFactor = adjustedFactor;
-                        filled = true;
-                        break;
-                    }
-                }
+                var adjustedFactor = ((mostExpensiveFactor.EndAmount + 1) * mostExpensiveFactor.Price) / portfolioValue;
 
-                if (!filled)
-                    break;
+                mostExpensiveFactor.EndAmount += 1;
+                mostExpensiveFactor.CurrentFactor = adjustedFactor;
+                usedUpAmount += mostExpensiveFactor.Price;
+
+                //var factorsInPlay = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).ToList();
+                //if (!factorsInPlay.Any())
+                //{
+                //    break;
+                //}
+                //
+                //bool filled = false;
+                //foreach (var factor in factorsInPlay)
+                //{
+                //    var adjustedFactor = ((factor.EndAmount + 1) * factor.Price) / portfolioValue;
+                //    var newDifference = Math.Abs(factor.DesiredFactor - adjustedFactor);
+                //    if (factorsInPlay.Count == 1 || factorsInPlay.Any(f => f.FactorDifference > newDifference))
+                //    {
+                //        factor.EndAmount += 1;
+                //        factor.CurrentFactor = adjustedFactor;
+                //        filled = true;
+                //        break;
+                //    }
+                //}
+                //
+                //if (!filled)
+                //    break;
             }
 
             actions.AddRange(factors.Where(f => f.EndAmount != f.ActualAllocation.AllocationAmount).Select(f => new RebalanceAction
