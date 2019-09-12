@@ -15,7 +15,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
         {
             ConcurrentDictionary<Portfolio, List<ScenarioResult>> mapping = new ConcurrentDictionary<Portfolio, List<ScenarioResult>>();
 
-            var results = RunScenario(dataSet);
+            var results = await RunScenario(dataSet);
 
             foreach (var scenarioResult in results)
             {
@@ -28,7 +28,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             var tasks = new List<Task>();
             for (var i = 0; i < 1000; i++)
             {
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Run(async () =>
                 {
                     var revisedHistory = dataSet.History.ShuffleCopy();
                     var revisedDataSet = new RunScenarioDataSet
@@ -40,7 +40,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                         Portfolios = dataSet.Portfolios
                     };
 
-                    var nextResults = RunScenario(revisedDataSet);
+                    var nextResults = await RunScenario(revisedDataSet);
                     foreach (var scenarioResult in nextResults)
                     {
                         var index = nextResults.IndexOf(scenarioResult);
@@ -60,14 +60,14 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             }).ToList();
         }
 
-        public List<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
+        public async Task<List<ScenarioResult>> RunScenario(RunScenarioDataSet dataSet)
         {
             if (dataSet.CashInfluxCadence != CadenceTypeEnum.Weekly)
                 throw new Exception($"{dataSet.CashInfluxCadence} cadence not yet supported.");
 
-            List<ScenarioResult> results = new List<ScenarioResult>();
+            ConcurrentQueue<ScenarioResult> results = new ConcurrentQueue<ScenarioResult>();
 
-            foreach (var portfolio in dataSet.Portfolios)
+            await Task.WhenAll(dataSet.Portfolios.Select(portfolio => Task.Run(() =>
             {
                 var symbols = portfolio.Allocations.Select(a => a.Symbol).ToList();
 
@@ -127,10 +127,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                     TotalCashInvested = totalCashInvested
                 };
 
-                results.Add(result);
-            }
+                results.Enqueue(result);
+            })));
 
-            return results;
+            return results.ToList();
         }
 
         public RebalanceResult Rebalance(RebalanceDataSet dataSet)
