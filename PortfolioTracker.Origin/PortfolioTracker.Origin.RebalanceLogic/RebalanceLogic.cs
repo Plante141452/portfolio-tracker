@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
@@ -9,11 +11,12 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 {
     public class RebalanceLogic
     {
-        public List<SimulationResult> Simulate(RunScenarioDataSet dataSet)
+        public async Task<List<SimulationResult>> Simulate(RunScenarioDataSet dataSet)
         {
-            Dictionary<Portfolio, List<ScenarioResult>> mapping = new Dictionary<Portfolio, List<ScenarioResult>>();
+            ConcurrentDictionary<Portfolio, List<ScenarioResult>> mapping = new ConcurrentDictionary<Portfolio, List<ScenarioResult>>();
 
             var results = RunScenario(dataSet);
+
             foreach (var scenarioResult in results)
             {
                 var index = results.IndexOf(scenarioResult);
@@ -22,27 +25,33 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 mapping[portfolio] = new List<ScenarioResult> { scenarioResult };
             }
 
-            for (var i = 0; i < 100; i++)
+            var tasks = new List<Task>();
+            for (var i = 0; i < 1000; i++)
             {
-                var revisedHistory = dataSet.History.ShuffleCopy();
-                var revisedDataSet = new RunScenarioDataSet
+                tasks.Add(Task.Run(() =>
                 {
-                    CashInfluxAmount = dataSet.CashInfluxAmount,
-                    CashInfluxCadence = dataSet.CashInfluxCadence,
-                    History = revisedHistory,
-                    InitialInvestment = dataSet.InitialInvestment,
-                    Portfolios = dataSet.Portfolios
-                };
+                    var revisedHistory = dataSet.History.ShuffleCopy();
+                    var revisedDataSet = new RunScenarioDataSet
+                    {
+                        CashInfluxAmount = dataSet.CashInfluxAmount,
+                        CashInfluxCadence = dataSet.CashInfluxCadence,
+                        History = revisedHistory,
+                        InitialInvestment = dataSet.InitialInvestment,
+                        Portfolios = dataSet.Portfolios
+                    };
 
-                var nextResults = RunScenario(revisedDataSet);
-                foreach (var scenarioResult in nextResults)
-                {
-                    var index = nextResults.IndexOf(scenarioResult);
-                    var portfolio = dataSet.Portfolios[index];
+                    var nextResults = RunScenario(revisedDataSet);
+                    foreach (var scenarioResult in nextResults)
+                    {
+                        var index = nextResults.IndexOf(scenarioResult);
+                        var portfolio = dataSet.Portfolios[index];
 
-                    mapping[portfolio].Add(scenarioResult);
-                }
+                        mapping[portfolio].Add(scenarioResult);
+                    }
+                }));
             }
+
+            await Task.WhenAll(tasks);
 
             return mapping.Select(kp => new SimulationResult
             {
