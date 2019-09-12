@@ -256,8 +256,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             foreach (var simulationResult in result)
             {
                 var firstScenario = simulationResult.Results.First();
-                var averagePercent = simulationResult.Results.Average(r => r.PercentIncrease);
-                Console.WriteLine($"Portfolio {result.IndexOf(simulationResult)} grew by an average of {averagePercent * 100} percent from {firstScenario.StartDate.ToShortDateString()} to {firstScenario.EndDate.ToShortDateString()}");
+                var averagePercent = Math.Round(simulationResult.Results.Average(r => r.PercentIncrease), 2);
+                var maxPercent = Math.Round(simulationResult.Results.Max(r => r.PercentIncrease), 2);
+                var minPercent = Math.Round(simulationResult.Results.Min(r => r.PercentIncrease), 2);
+                Console.WriteLine($"Portfolio {result.IndexOf(simulationResult)} experienced growth between {minPercent * 100}% and {maxPercent * 100}% with an average of {averagePercent * 100}% from {firstScenario.StartDate.ToShortDateString()} to {firstScenario.EndDate.ToShortDateString()}");
             }
         }
 
