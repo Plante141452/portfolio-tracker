@@ -60,7 +60,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
                     new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
                     new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
-                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 9m },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 9m },
                     new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
                 },
                 new[]
@@ -76,7 +77,9 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
                     new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
                     new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
-                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "SHY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
                     new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
                 }
             }.ToList();
@@ -155,7 +158,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 6 },
                 new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m, CurrentAmount = 11 },
                 new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentAmount = 5 },
-                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m, CurrentAmount = 25 },
+                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentAmount = 25 },
+                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m, CurrentAmount = 0 },
                 new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 3 },
             };
 
