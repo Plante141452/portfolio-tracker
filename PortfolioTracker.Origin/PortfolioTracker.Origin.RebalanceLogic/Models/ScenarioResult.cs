@@ -1,4 +1,5 @@
 ﻿using System;
+using PortfolioTracker.Origin.Common.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic
 {

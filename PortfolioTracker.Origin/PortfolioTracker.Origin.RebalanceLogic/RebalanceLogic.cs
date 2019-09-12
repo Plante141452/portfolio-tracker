@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
@@ -10,68 +9,119 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 {
     public class RebalanceLogic
     {
-        public async Task<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
+        public List<SimulationResult> Simulate(RunScenarioDataSet dataSet)
+        {
+            Dictionary<Portfolio, List<ScenarioResult>> mapping = new Dictionary<Portfolio, List<ScenarioResult>>();
+
+            var results = RunScenario(dataSet);
+            foreach (var scenarioResult in results)
+            {
+                var index = results.IndexOf(scenarioResult);
+                var portfolio = dataSet.Portfolios[index];
+
+                mapping[portfolio] = new List<ScenarioResult> { scenarioResult };
+            }
+
+            for (var i = 0; i < 100; i++)
+            {
+                var revisedHistory = dataSet.History.ShuffleCopy();
+                var revisedDataSet = new RunScenarioDataSet
+                {
+                    CashInfluxAmount = dataSet.CashInfluxAmount,
+                    CashInfluxCadence = dataSet.CashInfluxCadence,
+                    History = revisedHistory,
+                    InitialInvestment = dataSet.InitialInvestment,
+                    Portfolios = dataSet.Portfolios
+                };
+
+                var nextResults = RunScenario(revisedDataSet);
+                foreach (var scenarioResult in nextResults)
+                {
+                    var index = nextResults.IndexOf(scenarioResult);
+                    var portfolio = dataSet.Portfolios[index];
+
+                    mapping[portfolio].Add(scenarioResult);
+                }
+            }
+
+            return mapping.Select(kp => new SimulationResult
+            {
+                Portfolio = kp.Key,
+                Results = kp.Value
+            }).ToList();
+        }
+
+        public List<ScenarioResult> RunScenario(RunScenarioDataSet dataSet)
         {
             if (dataSet.CashInfluxCadence != CadenceTypeEnum.Weekly)
                 throw new Exception($"{dataSet.CashInfluxCadence} cadence not yet supported.");
 
-            var symbols = dataSet.Portfolio.Allocations.Select(a => a.Symbol).ToList();
+            List<ScenarioResult> results = new List<ScenarioResult>();
 
-            var currentAllocations = symbols.Select(s => new StockAllocation
+            foreach (var portfolio in dataSet.Portfolios)
             {
-                Symbol = s,
-                AllocationAmount = 0,
-                AllocationType = AllocationTypeEnum.StockAmount
-            }).ToList();
+                var symbols = portfolio.Allocations.Select(a => a.Symbol).ToList();
 
-            decimal cashOnHand = dataSet.InitialInvestment;
-            foreach (var period in dataSet.History)
-            {
-                var quotes = period.Stocks.Select(s => new Quote
+                var currentAllocations = symbols.Select(s => new StockAllocation
                 {
-                    Symbol = s.Symbol,
-                    Price = s.PeriodData.AdjustedClose,
-                    Time = period.ClosingDate,
-                    Volume = s.PeriodData.Volume
+                    Symbol = s,
+                    AllocationAmount = 0,
+                    AllocationType = AllocationTypeEnum.StockAmount
                 }).ToList();
 
-                var rebalanceDataSet = new RebalanceDataSet
+                decimal cashOnHand = dataSet.InitialInvestment;
+                foreach (var period in dataSet.History)
                 {
-                    ActualAllocations = currentAllocations,
-                    CashOnHand = cashOnHand,
-                    Portfolio = dataSet.Portfolio,
-                    Quotes = quotes
+                    var quotes = period.Stocks.Select(s => new Quote
+                    {
+                        Symbol = s.Symbol,
+                        Price = s.PeriodData.AdjustedClose,
+                        Time = period.ClosingDate,
+                        Volume = s.PeriodData.Volume
+                    }).ToList();
+
+                    var rebalanceDataSet = new RebalanceDataSet
+                    {
+                        ActualAllocations = currentAllocations,
+                        CashOnHand = cashOnHand,
+                        Portfolio = portfolio,
+                        Quotes = quotes
+                    };
+
+                    var rebalanceResult = Rebalance(rebalanceDataSet);
+
+                    cashOnHand = rebalanceResult.RemainingCashOnHand + dataSet.CashInfluxAmount;
+
+                    foreach (var action in rebalanceResult.Actions)
+                    {
+                        var actualAllocation = currentAllocations.Find(a => a.Symbol == action.Symbol);
+                        if (action.ActionType == RebalanceActionTypeEnum.Buy)
+                            actualAllocation.AllocationAmount += action.Amount;
+                        else
+                            actualAllocation.AllocationAmount -= action.Amount;
+                    }
+                }
+
+                decimal finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
+                var lastPeriod = dataSet.History.Last();
+
+                foreach (var allocation in currentAllocations)
+                    finalPortfolioValue += allocation.AllocationAmount * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
+
+                var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (dataSet.History.Count - 1));
+                var result = new ScenarioResult
+                {
+                    PercentIncrease = finalPortfolioValue / totalCashInvested,
+                    StartDate = dataSet.History.First().ClosingDate,
+                    EndDate = lastPeriod.ClosingDate,
+                    FinalPortfolioValue = finalPortfolioValue,
+                    TotalCashInvested = totalCashInvested
                 };
 
-                var rebalanceResult = Rebalance(rebalanceDataSet);
-
-                cashOnHand = rebalanceResult.RemainingCashOnHand + dataSet.CashInfluxAmount;
-
-                foreach (var action in rebalanceResult.Actions)
-                {
-                    var actualAllocation = currentAllocations.Find(a => a.Symbol == action.Symbol);
-                    if (action.ActionType == RebalanceActionTypeEnum.Buy)
-                        actualAllocation.AllocationAmount += action.Amount;
-                    else
-                        actualAllocation.AllocationAmount -= action.Amount;
-                }
+                results.Add(result);
             }
 
-            decimal finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
-            var lastPeriod = dataSet.History.Last();
-
-            foreach (var allocation in currentAllocations)
-                finalPortfolioValue += allocation.AllocationAmount * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
-
-            var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (dataSet.History.Count - 1));
-            return new ScenarioResult
-            {
-                PercentIncrease = finalPortfolioValue / totalCashInvested,
-                StartDate = dataSet.History.First().ClosingDate,
-                EndDate = lastPeriod.ClosingDate,
-                FinalPortfolioValue = finalPortfolioValue,
-                TotalCashInvested = totalCashInvested
-            };
+            return results;
         }
 
         public RebalanceResult Rebalance(RebalanceDataSet dataSet)

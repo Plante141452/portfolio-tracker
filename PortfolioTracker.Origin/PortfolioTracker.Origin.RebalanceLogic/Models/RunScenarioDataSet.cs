@@ -7,7 +7,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 {
     public class RunScenarioDataSet
     {
-        public Portfolio Portfolio { get; set; }
+        public List<Portfolio> Portfolios { get; set; }
         public List<PortfolioHistoryPeriod> History { get; set; }
         public decimal InitialInvestment { get; set; }
 

@@ -35,6 +35,10 @@ namespace PortfolioTracker.Origin.AlphaClient
                 {
                     var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
                     var history = TransformSeries(data);
+
+                    if (existingData != null)
+                        history = MergeHistories(history, existingData);
+
                     histories.Enqueue(history);
                     await _stockData.SaveHistory(history);
                 }
@@ -43,13 +47,33 @@ namespace PortfolioTracker.Origin.AlphaClient
             return histories.ToList();
         }
 
+        private StockHistory MergeHistories(StockHistory updatedData, StockHistory existingData)
+        {
+            var existingDataToMerge = existingData.History.Where(h => !updatedData.History.Any(uh => uh.ClosingDate.Equals(h.ClosingDate))).ToList();
+
+            if (existingDataToMerge.Count == existingData.History.Count)
+                throw new Exception("Cannot merge historical data as they do not overlap.");
+
+            updatedData.History.AddRange(existingDataToMerge);
+            updatedData.History = updatedData.History.OrderBy(h => h.ClosingDate).ToList();
+
+            StockHistoryItem lastClosing = updatedData.History.First();
+            foreach (var history in updatedData.History.Skip(1))
+            {
+                history.AdjustedClose = lastClosing.AdjustedClose * lastClosing.AdjustedPercentChanged;
+                lastClosing = history;
+            }
+
+            return updatedData;
+        }
+
         private StockHistory TransformSeries(StockTimeSeries series)
         {
             var history = series.DataPoints.ToList();
             return new StockHistory
             {
                 Symbol = series.Symbol,
-                History = history.Select((dp, i) => new StockHistoryItem
+                History = history.Skip(1).Select((dp, i) => new StockHistoryItem
                 {
                     ClosingDate = dp.Time,
                     Volume = dp.Volume,
