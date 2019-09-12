@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess.DataTypes;
+using System.Threading.Tasks;
 
 namespace PortfolioTracker.Origin.DataAccess
 {
@@ -23,6 +23,8 @@ namespace PortfolioTracker.Origin.DataAccess
             FilterDefinition<StockHistoryData> filter = Builders<StockHistoryData>.Filter.Eq(s => s.Symbol, symbol);
             var filteredData = await collection.FindAsync(filter);
             var data = filteredData.FirstOrDefault();
+            if (data == null)
+                return null;
 
             return new StockHistory
             {

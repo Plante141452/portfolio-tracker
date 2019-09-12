@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.DataAccess;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 {
@@ -34,64 +33,55 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             {
                 new[]
                 {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "SHY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                    new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m },
+                    new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
                 },
                 new[]
                 {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "SHY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                    new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m },
+                    new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
                 },
                 new[]
                 {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "SHY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
-                },
-                new[]
-                {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "SHY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
-                },
-                new[]
-                {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "AGG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
-                },
-                new[]
-                {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "AGG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
-                },
-                new[]
-                {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "AGG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
-                },
-                new[]
-                {
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2 },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1 },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 },
-                    new { Symbol = "AGG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3 }
+                    new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m },
+                    new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+                    new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
                 }
             }.ToList();
 
-            var symbols = new List<string> { "SPY", "QQQ", "DIA", "SHY", "AGG" };
-
+            var symbols = stocks.SelectMany(s => s.Select(st => st.Symbol)).Distinct().ToList();
             var relevantPeriods = await _alphaClient.GetPortfolioHistory(symbols);
 
             foreach (var stockSet in stocks)
@@ -126,6 +116,21 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             }
         }
 
+
+        //new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m },
+        //new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+        //new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+        //new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+        //new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m },
+        //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+        //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+        //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+        //new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+        //new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
+        //new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+        //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+        //new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m }
+
         [Test]
         public async Task Rebalance()
         {
@@ -139,13 +144,13 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 new { Symbol = "TRXC", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 15m, CurrentAmount = 15 },
                 new { Symbol = "EROS", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 2m, CurrentAmount = 2 },
                 new { Symbol = "TRNX", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 5m, CurrentAmount = 5 },
-                new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5.5m, CurrentAmount = 3 },
+                new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentAmount = 3 },
                 new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 13 },
-                new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentAmount = 12 },
-                new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentAmount = 16 },
-                new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3.5m, CurrentAmount = 40 },
-                new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2.5m, CurrentAmount = 4 },
-                new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2.75m, CurrentAmount = 10 },
+                new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 12 },
+                new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 16 },
+                new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 40 },
+                new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentAmount = 4 },
+                new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 10 },
                 new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 13 },
                 new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 6 },
                 new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m, CurrentAmount = 11 },
@@ -176,7 +181,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
-                CashOnHand = 32.08m,
+                CashOnHand = 182.08m,
                 ActualAllocations = actualAllocations,
                 Portfolio = portfolio,
                 Quotes = quotes
