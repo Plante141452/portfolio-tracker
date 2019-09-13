@@ -36,14 +36,15 @@ namespace PortfolioTracker.Origin.AlphaClient
                     while (RequestTimeLog.Count >= RequestsPerMinute)
                     {
                         RequestTimeLog.TryDequeue(out var lastRequest);
-                        int elapsedTime = (int)DateTime.Now.Subtract(lastRequest).TotalSeconds;
-                        int wait = 60 - elapsedTime;
+                        double elapsedTime = DateTime.Now.Subtract(lastRequest).TotalSeconds;
+                        double wait = 60 - elapsedTime;
                         if (wait > 0)
-                            Thread.Sleep(wait);
+                            Thread.Sleep((int)(wait * 1000));
                     }
+
+                    RequestTimeLog.Enqueue(DateTime.Now);
                 }
 
-                RequestTimeLog.Enqueue(DateTime.Now);
                 return func(Client);
             });
         }
