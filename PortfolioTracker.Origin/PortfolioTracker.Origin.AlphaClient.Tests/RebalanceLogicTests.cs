@@ -181,26 +181,26 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             var stocks = new[]
             {
                 new { Symbol = "DIS", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-                new { Symbol = "SLRX", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentAmount = 10 },
+                new { Symbol = "SLRX", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentAmount = 11 },
                 new { Symbol = "SQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 3 },
                 new { Symbol = "V", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
                 new { Symbol = "MSFT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-                new { Symbol = "TRXC", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 23 },
-                new { Symbol = "EROS", Type = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentAmount = 9 },
+                new { Symbol = "TRXC", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 24 },
+                new { Symbol = "EROS", Type = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentAmount = 10 },
                 new { Symbol = "TRNX", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 8 },
-                new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 3 },
+                new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 4 },
                 new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 13 },
                 new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 14 },
                 new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 16 },
-                new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 40 },
+                new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 32 },
                 new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 4 },
                 new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 10 },
-                new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 13 },
-                new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 6 },
-                new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 11 },
+                new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 14 },
+                new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 7 },
+                new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 8 },
                 new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentAmount = 5 },
-                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m, CurrentAmount = 22 },
-                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentAmount = 3 }
+                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 15m, CurrentAmount = 22 },
+                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentAmount = 4 }
             };
 
             var actualAllocations = stocks.Select(s => new StockAllocation
@@ -225,7 +225,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
-                CashOnHand = 150.33m,
+                CashOnHand = 150.15m,
                 ActualAllocations = actualAllocations,
                 Portfolio = portfolio,
                 Quotes = quotes
