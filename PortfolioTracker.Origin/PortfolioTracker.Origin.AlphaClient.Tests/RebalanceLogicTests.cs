@@ -180,17 +180,17 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         {
             var stocks = new[]
             {
-                new { Symbol = "DIS", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 1m, CurrentAmount = 1 },
-                new { Symbol = "SLRX", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 10m, CurrentAmount = 10 },
-                new { Symbol = "SQ", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 2m, CurrentAmount = 2 },
-                new { Symbol = "V", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 1m, CurrentAmount = 1 },
-                new { Symbol = "MSFT", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 1m, CurrentAmount = 1 },
-                new { Symbol = "TRXC", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 15m, CurrentAmount = 15 },
-                new { Symbol = "EROS", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 2m, CurrentAmount = 2 },
-                new { Symbol = "TRNX", Type = AllocationTypeEnum.StockAmount, DesiredAmount = 5m, CurrentAmount = 5 },
+                new { Symbol = "DIS", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
+                new { Symbol = "SLRX", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentAmount = 10 },
+                new { Symbol = "SQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 3 },
+                new { Symbol = "V", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
+                new { Symbol = "MSFT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
+                new { Symbol = "TRXC", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 23 },
+                new { Symbol = "EROS", Type = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentAmount = 9 },
+                new { Symbol = "TRNX", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 8 },
                 new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 3 },
                 new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 13 },
-                new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 12 },
+                new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 14 },
                 new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 16 },
                 new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 40 },
                 new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 4 },
@@ -199,9 +199,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 6 },
                 new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 11 },
                 new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentAmount = 5 },
-                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m, CurrentAmount = 25 },
-                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 0 },
-                new { Symbol = "VYM", Type = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentAmount = 3 },
+                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m, CurrentAmount = 22 },
+                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentAmount = 3 }
             };
 
             var actualAllocations = stocks.Select(s => new StockAllocation
@@ -226,7 +225,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
-                CashOnHand = 32.54m,
+                CashOnHand = 150.33m,
                 ActualAllocations = actualAllocations,
                 Portfolio = portfolio,
                 Quotes = quotes
