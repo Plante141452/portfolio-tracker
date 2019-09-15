@@ -1,7 +1,6 @@
 ﻿using System;
-using PortfolioTracker.Origin.Common.Models;
 
-namespace PortfolioTracker.Origin.RebalanceLogic
+namespace PortfolioTracker.Origin.RebalanceLogic.Models
 {
     public class ScenarioResult
     {

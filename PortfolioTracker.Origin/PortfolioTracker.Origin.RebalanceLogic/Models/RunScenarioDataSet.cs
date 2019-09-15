@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 
-namespace PortfolioTracker.Origin.RebalanceLogic
+namespace PortfolioTracker.Origin.RebalanceLogic.Models
 {
     public class RunScenarioDataSet
     {

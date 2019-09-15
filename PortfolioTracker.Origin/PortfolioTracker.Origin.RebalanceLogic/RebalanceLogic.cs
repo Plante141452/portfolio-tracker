@@ -69,13 +69,13 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             await Task.WhenAll(dataSet.Portfolios.Select(portfolio => Task.Run(() =>
             {
-                var symbols = portfolio.Allocations.Select(a => a.Symbol).ToList();
+                var symbols = portfolio.AllStocks.Select(a => a.Symbol).ToList();
 
                 var currentAllocations = symbols.Select(s => new StockAllocation
                 {
                     Symbol = s,
-                    AllocationAmount = 0,
-                    AllocationType = AllocationTypeEnum.StockAmount
+                    DesiredAmount = 0,
+                    DesiredAmountType = AllocationTypeEnum.StockAmount
                 }).ToList();
 
                 decimal cashOnHand = dataSet.InitialInvestment;
@@ -85,14 +85,19 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                     {
                         Symbol = s.Symbol,
                         Price = s.PeriodData.AdjustedClose,
-                        Time = period.ClosingDate,
+                        QuoteDate = period.ClosingDate,
                         Volume = s.PeriodData.Volume
                     }).ToList();
 
+                    portfolio.CashOnHand = cashOnHand;
+                    foreach (var allocation in portfolio.AllStocks)
+                    {
+                        var currentAllocation = currentAllocations.Find(s => s.Symbol == allocation.Symbol);
+                        allocation.CurrentShares = currentAllocation.CurrentShares;
+                    }
+
                     var rebalanceDataSet = new RebalanceDataSet
                     {
-                        ActualAllocations = currentAllocations,
-                        CashOnHand = cashOnHand,
                         Portfolio = portfolio,
                         Quotes = quotes
                     };
@@ -105,9 +110,9 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                     {
                         var actualAllocation = currentAllocations.Find(a => a.Symbol == action.Symbol);
                         if (action.ActionType == RebalanceActionTypeEnum.Buy)
-                            actualAllocation.AllocationAmount += action.Amount;
+                            actualAllocation.CurrentShares += action.Amount;
                         else
-                            actualAllocation.AllocationAmount -= action.Amount;
+                            actualAllocation.CurrentShares -= action.Amount;
                     }
                 }
 
@@ -115,7 +120,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 var lastPeriod = dataSet.History.Last();
 
                 foreach (var allocation in currentAllocations)
-                    finalPortfolioValue += allocation.AllocationAmount * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
+                    finalPortfolioValue += allocation.CurrentShares * lastPeriod.Stocks.Find(s => s.Symbol == allocation.Symbol).PeriodData.AdjustedClose;
 
                 var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (dataSet.History.Count - 1));
                 var result = new ScenarioResult
@@ -135,51 +140,50 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
         public RebalanceResult Rebalance(RebalanceDataSet dataSet)
         {
-            if (dataSet.ActualAllocations.Any(a => a.AllocationType != AllocationTypeEnum.StockAmount))
-                throw new Exception("Actual allocation amounts must be of stock amount type when rebalancing.");
-
-            var stocks = dataSet.Portfolio.Allocations.Select(a => new RebalanceItem
+            var stocks = dataSet.Portfolio.AllStocks.Select(a => new RebalanceItem
             {
-                DesiredAllocation = a,
-                ActualAllocation = dataSet.ActualAllocations.First(aa => string.Equals(aa.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)),
+                Symbol = a.Symbol,
+                CurrentShares = a.CurrentShares,
+                DesiredAmountType = a.DesiredAmountType,
+                DesiredAmount = a.DesiredAmount,
                 Price = dataSet.Quotes.First(q => string.Equals(q.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)).Price
             }).ToList();
 
-            var portfolioValue = dataSet.CashOnHand + stocks.Sum(s => s.ActualAllocation.AllocationAmount * s.Price);
+            var portfolioValue = dataSet.Portfolio.CashOnHand + stocks.Sum(s => s.CurrentShares * s.Price);
 
-            var amountStocks = stocks.Where(s => s.DesiredAllocation.AllocationType == AllocationTypeEnum.StockAmount).ToList();
-            var cashStocks = stocks.Where(s => s.DesiredAllocation.AllocationType == AllocationTypeEnum.CashAmount).ToList();
+            var amountStocks = stocks.Where(s => s.DesiredAmountType == AllocationTypeEnum.StockAmount).ToList();
+            var cashStocks = stocks.Where(s => s.DesiredAmountType == AllocationTypeEnum.CashAmount).ToList();
 
             List<RebalanceAction> actions = new List<RebalanceAction>();
 
             foreach (var stock in amountStocks)
             {
-                if (stock.ActualAllocation.AllocationAmount != stock.DesiredAllocation.AllocationAmount)
+                if (stock.CurrentShares != stock.DesiredAmount)
                 {
-                    var dif = (int)stock.DesiredAllocation.AllocationAmount - (int)stock.ActualAllocation.AllocationAmount;
+                    var dif = (int)stock.DesiredAmount - stock.CurrentShares;
                     var action = dif > 0 ? RebalanceActionTypeEnum.Buy : RebalanceActionTypeEnum.Sell;
 
                     actions.Add(new RebalanceAction
                     {
-                        Symbol = stock.DesiredAllocation.Symbol,
+                        Symbol = stock.Symbol,
                         ActionType = action,
                         Amount = Math.Abs(dif)
                     });
                 }
 
-                portfolioValue -= stock.DesiredAllocation.AllocationAmount * stock.Price;
+                portfolioValue -= stock.DesiredAmount * stock.Price;
             }
 
             foreach (var stock in cashStocks)
             {
-                var actualValue = stock.ActualAllocation.AllocationAmount * stock.Price;
-                var dif = stock.DesiredAllocation.AllocationAmount - actualValue; // (-100)
+                var actualValue = stock.CurrentShares * stock.Price;
+                var dif = stock.DesiredAmount - actualValue; // (-100)
 
                 var difAmount = (int)Math.Truncate(dif / stock.Price); // 2 (-45)
                 if (difAmount > 0)
                     difAmount -= 1; //Stay below max amount
 
-                portfolioValue -= (stock.ActualAllocation.AllocationAmount + dif) * stock.Price;
+                portfolioValue -= (stock.CurrentShares + dif) * stock.Price;
 
                 if (difAmount != 0)
                 {
@@ -187,27 +191,31 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
                     actions.Add(new RebalanceAction
                     {
-                        Symbol = stock.DesiredAllocation.Symbol,
+                        Symbol = stock.Symbol,
                         ActionType = action,
                         Amount = Math.Abs(difAmount)
                     });
                 }
             }
 
-            var percentageStocks = stocks.Where(s => s.DesiredAllocation.AllocationType == AllocationTypeEnum.Percentage).ToList();
-            var idealTotalFactor = percentageStocks.Sum(s => s.DesiredAllocation.AllocationAmount);
+            var percentageStocks = stocks.Where(s => s.DesiredAmountType == AllocationTypeEnum.Percentage).ToList();
+            var idealTotalFactor = percentageStocks.Sum(s => s.DesiredAmount);
 
             var factors = percentageStocks.Select(s => new
             {
-                s.ActualAllocation,
-                s.DesiredAllocation,
+                s.Symbol,
+                s.CurrentShares,
+                s.DesiredAmount,
+                s.DesiredAmountType,
                 s.Price,
-                DesiredFactor = s.DesiredAllocation.AllocationAmount / idealTotalFactor,
-                EndAmount = (int)Math.Truncate((((s.DesiredAllocation.AllocationAmount / idealTotalFactor) * portfolioValue) / s.Price))
+                DesiredFactor = s.DesiredAmount / idealTotalFactor,
+                EndAmount = (int)Math.Truncate((((s.DesiredAmount / idealTotalFactor) * portfolioValue) / s.Price))
             }).Select(s => new RebalancePercentageItem
             {
-                ActualAllocation = s.ActualAllocation,
-                DesiredAllocation = s.DesiredAllocation,
+                Symbol = s.Symbol,
+                CurrentShares = s.CurrentShares,
+                DesiredAmount = s.DesiredAmount,
+                DesiredAmountType = s.DesiredAmountType,
                 Price = s.Price,
                 DesiredFactor = s.DesiredFactor,
                 CurrentFactor = (s.EndAmount * s.Price) / portfolioValue,
@@ -254,11 +262,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 //    break;
             }
 
-            actions.AddRange(factors.Where(f => f.EndAmount != f.ActualAllocation.AllocationAmount).Select(f => new RebalanceAction
+            actions.AddRange(factors.Where(f => f.EndAmount != f.CurrentShares).Select(f => new RebalanceAction
             {
-                Symbol = f.DesiredAllocation.Symbol,
-                ActionType = f.EndAmount > f.ActualAllocation.AllocationAmount ? RebalanceActionTypeEnum.Buy : RebalanceActionTypeEnum.Sell,
-                Amount = (int)Math.Abs(f.EndAmount - f.ActualAllocation.AllocationAmount)
+                Symbol = f.Symbol,
+                ActionType = f.EndAmount > f.CurrentShares ? RebalanceActionTypeEnum.Buy : RebalanceActionTypeEnum.Sell,
+                Amount = Math.Abs(f.EndAmount - f.CurrentShares)
             }));
 
             portfolioValue -= factors.Sum(f => f.Price * f.EndAmount);

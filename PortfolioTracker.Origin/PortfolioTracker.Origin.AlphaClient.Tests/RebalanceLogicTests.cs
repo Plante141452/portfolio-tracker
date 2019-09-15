@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -89,11 +90,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             var portfolios = stocks.Select(stockSet => new Portfolio
             {
-                Allocations = stockSet.Select(s => new StockAllocation
+                Stocks = stockSet.Select(s => new StockAllocation
                 {
                     Symbol = s.Symbol,
-                    AllocationType = s.Type,
-                    AllocationAmount = s.DesiredAmount
+                    DesiredAmountType = s.Type,
+                    DesiredAmount = s.DesiredAmount
                 }).ToList()
             }).ToList();
 
@@ -146,11 +147,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             var portfolios = stocks.Select(stockSet => new Portfolio
             {
-                Allocations = stockSet.Select(s => new StockAllocation
+                Stocks = stockSet.Select(s => new StockAllocation
                 {
                     Symbol = s.Symbol,
-                    AllocationType = s.Type,
-                    AllocationAmount = s.DesiredAmount
+                    DesiredAmountType = s.Type,
+                    DesiredAmount = s.DesiredAmount
                 }).ToList()
             }).ToList();
 
@@ -178,55 +179,128 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         [Test]
         public async Task Rebalance()
         {
-            var stocks = new[]
+            var lowRiskStocks = new Category
             {
-                new { Symbol = "DIS", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-                new { Symbol = "SLRX", Type = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentAmount = 11 },
-                new { Symbol = "SQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 3 },
-                new { Symbol = "V", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-                new { Symbol = "MSFT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-                new { Symbol = "TRXC", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 24 },
-                new { Symbol = "EROS", Type = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentAmount = 10 },
-                new { Symbol = "TRNX", Type = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentAmount = 8 },
-                new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 4 },
-                new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 13 },
-                new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 14 },
-                new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 16 },
-                new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 32 },
-                new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 4 },
-                new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentAmount = 10 },
-                new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentAmount = 14 },
-                new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 7 },
-                new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentAmount = 8 },
-                new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentAmount = 5 },
-                new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 15m, CurrentAmount = 22 },
-                new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentAmount = 4 }
-            };
-
-            var actualAllocations = stocks.Select(s => new StockAllocation
-            {
-                Symbol = s.Symbol,
-                AllocationType = AllocationTypeEnum.StockAmount,
-                AllocationAmount = s.CurrentAmount
-            }).ToList();
-
-            var portfolio = new Portfolio
-            {
-                Allocations = stocks.Select(s => new StockAllocation
+                Name = "Low Risk Stocks",
+                Stocks = new List<StockAllocation>
                 {
-                    Symbol = s.Symbol,
-                    AllocationType = s.Type,
-                    AllocationAmount = s.DesiredAmount
-                }).ToList()
+                    new StockAllocation { Symbol = "DIS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
+                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 3 },
+                    new StockAllocation { Symbol = "V", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
+                    new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 }
+                }
             };
 
-            var symbols = stocks.Select(s => s.Symbol).ToList();
+            var highRisk = new Category
+            {
+                Name = "High Risk Stocks",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 11 },
+                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 24 },
+                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 10 },
+                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 8 }
+                }
+            };
+
+            var techEtFs = new Category
+            {
+                Name = "Tech",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SOXL", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "CIBR", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 13 }
+                }
+            };
+
+            var cannabisEtFs = new Category
+            {
+                Name = "Cannabis",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "MJ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 14 }
+                }
+            };
+
+            var energyEtFs = new Category
+            {
+                Name = "Energy",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "TAN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 16 },
+                    new StockAllocation { Symbol = "ICLN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 32 }
+                }
+            };
+
+            var bioEtFs = new Category
+            {
+                Name = "BioTech",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 10 }
+                }
+            };
+
+            var financeEtFs = new Category
+            {
+                Name = "Finance",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 14 }
+                }
+            };
+
+            var indexes = new Category
+            {
+                Name = "Indexes",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 7 },
+                    new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 8 },
+                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 5 }
+                }
+            };
+
+            var bonds = new Category
+            {
+                Name = "Bonds",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 15m, CurrentShares = 22 },
+                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentShares = 4 }
+                }
+            };
+
+            Portfolio portfolio = new Portfolio
+            {
+                CashOnHand = 150.15m,
+                Categories = new List<Category>
+                {
+                    new Category
+                    {
+                        Name = "ETFs",
+                        Categories = new List<Category>
+                        {
+                            techEtFs,
+                            cannabisEtFs,
+                            energyEtFs,
+                            bioEtFs,
+                            financeEtFs
+                        }
+                    },
+                    indexes,
+                    bonds,
+                    lowRiskStocks,
+                    highRisk
+                }
+            };
+
+            var symbols = portfolio.AllStocks.Select(s => s.Symbol).ToList();
             var quotes = await _alphaClient.GetQuotes(symbols);
 
             RebalanceDataSet dataSet = new RebalanceDataSet
             {
-                CashOnHand = 150.15m,
-                ActualAllocations = actualAllocations,
                 Portfolio = portfolio,
                 Quotes = quotes
             };

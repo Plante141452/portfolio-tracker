@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace PortfolioTracker.Origin.Common.Models
+﻿namespace PortfolioTracker.Origin.Common.Models
 {
-    public class Portfolio
+    public class Portfolio : Category
     {
-        public List<StockAllocation> Allocations { get; set; }
+        public decimal CashOnHand { get; set; }
     }
 }

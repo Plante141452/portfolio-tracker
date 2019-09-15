@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
-using PortfolioTracker.Origin.DataAccess;
+using PortfolioTracker.Origin.DataAccess.Interfaces;
 
 namespace PortfolioTracker.Origin.AlphaClient
 {
@@ -102,14 +102,42 @@ namespace PortfolioTracker.Origin.AlphaClient
 
         public async Task<List<Quote>> GetQuotes(List<string> symbols)
         {
-            var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbols.ToArray()));
-            return quotes.Select(q => new Quote
+            var existingQuotes = await _stockData.GetQuotes();
+
+            List<Quote> quotesToReuse = new List<Quote>();
+            List<Quote> quotesToRefresh = new List<Quote>();
+
+            foreach (var quote in existingQuotes)
             {
-                Symbol = q.Symbol,
-                Price = q.Price,
-                Time = q.Time,
-                Volume = q.Volume ?? 0
-            }).ToList();
+                if (DateTime.Now.Subtract(quote.UpdatedDate).TotalMinutes > 5)
+                    quotesToRefresh.Add(quote);
+                else
+                {
+                    if (symbols.Contains(quote.Symbol))
+                        symbols.Remove(quote.Symbol);
+                    quotesToReuse.Add(quote);
+                }
+            }
+
+            var symbolsToRetrieve = quotesToRefresh.Select(q => q.Symbol).Union(symbols).Distinct();
+
+            if (symbolsToRetrieve.Any())
+            {
+                var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbols.ToArray()));
+                var mappedQuotes = quotes.Select(q => new Quote
+                {
+                    Symbol = q.Symbol,
+                    Price = q.Price,
+                    QuoteDate = q.Time,
+                    UpdatedDate = DateTime.Now,
+                    Volume = q.Volume ?? 0
+                }).ToList();
+
+                quotesToRefresh = mappedQuotes;
+                await _stockData.SaveQuotes(quotesToRefresh);
+            }
+
+            return quotesToReuse.Union(quotesToRefresh).ToList();
         }
     }
 }

@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.DataAccess", "PortfolioTracker.Origin.DataAccess\PortfolioTracker.Origin.DataAccess.csproj", "{2CD78185-676F-4D92-AB62-065A0B17ADCF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.DataAccess.Tests", "PortfolioTracker.Origin.DataAccess.Tests\PortfolioTracker.Origin.DataAccess.Tests.csproj", "{A25C5172-154E-439C-AB00-FC1A19B1E2AB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.AlphaClient", "PortfolioTracker.Origin.AlphaClient\PortfolioTracker.Origin.AlphaClient.csproj", "{294CCEF7-F44C-4351-AD0D-2897AAD9666C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.Origin.RebalanceLogic.Tests", "PortfolioTracker.Origin.AlphaClient.Tests\PortfolioTracker.Origin.RebalanceLogic.Tests.csproj", "{EBF49C6D-C696-42E1-9C78-B7A0A9A3FC57}"
@@ -19,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.Api", "PortfolioTracker.Origin.Api\PortfolioTracker.Origin.Api.csproj", "{8AE5D706-A318-44B4-98F5-75BF9D2307BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.Origin.DataAccess.Tests", "PortfolioTracker.Origin.DataAccess.Tests\PortfolioTracker.Origin.DataAccess.Tests.csproj", "{9B532D13-E89F-4FD4-AFCD-7D2021BDF8CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +29,6 @@ Global
 		{2CD78185-676F-4D92-AB62-065A0B17ADCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CD78185-676F-4D92-AB62-065A0B17ADCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CD78185-676F-4D92-AB62-065A0B17ADCF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A25C5172-154E-439C-AB00-FC1A19B1E2AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A25C5172-154E-439C-AB00-FC1A19B1E2AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A25C5172-154E-439C-AB00-FC1A19B1E2AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A25C5172-154E-439C-AB00-FC1A19B1E2AB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{294CCEF7-F44C-4351-AD0D-2897AAD9666C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{294CCEF7-F44C-4351-AD0D-2897AAD9666C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{294CCEF7-F44C-4351-AD0D-2897AAD9666C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,6 +49,10 @@ Global
 		{8AE5D706-A318-44B4-98F5-75BF9D2307BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AE5D706-A318-44B4-98F5-75BF9D2307BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AE5D706-A318-44B4-98F5-75BF9D2307BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B532D13-E89F-4FD4-AFCD-7D2021BDF8CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B532D13-E89F-4FD4-AFCD-7D2021BDF8CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B532D13-E89F-4FD4-AFCD-7D2021BDF8CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B532D13-E89F-4FD4-AFCD-7D2021BDF8CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

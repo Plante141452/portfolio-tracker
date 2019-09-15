@@ -2,10 +2,8 @@
 
 namespace PortfolioTracker.Origin.RebalanceLogic.Models
 {
-    public class RebalanceItem
+    public class RebalanceItem : StockAllocation
     {
-        public StockAllocation ActualAllocation { get; set; }
-        public StockAllocation DesiredAllocation { get; set; }
         public decimal Price { get; set; }
     }
 }
