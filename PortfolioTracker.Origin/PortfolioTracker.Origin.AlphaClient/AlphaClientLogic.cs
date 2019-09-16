@@ -29,7 +29,7 @@ namespace PortfolioTracker.Origin.AlphaClient
             {
                 var existingData = await _stockData.GetHistory(s);
                 var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
-                if (lastRecordedClose != null && DateTime.Now.Subtract(lastRecordedClose.Value).TotalDays < 7)
+                if (lastRecordedClose != null && DateTime.Now.Subtract(lastRecordedClose.Value).TotalDays < 8)
                     histories.Enqueue(existingData);
                 else
                 {
