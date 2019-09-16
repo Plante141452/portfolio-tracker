@@ -56,7 +56,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 shuffled[n] = value;
             }
 
-            shuffled = shuffled.OrderBy(p => p.ClosingDate).ToList();
+            shuffled = shuffled.OrderByDescending(p => p.ClosingDate).ToList();
 
             PortfolioHistoryPeriod lastPeriod = shuffled.OrderByDescending(s => s.ClosingDate).First();
             foreach (var period in shuffled.Skip(1))
@@ -73,7 +73,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 lastPeriod = period;
             }
 
-            return shuffled;
+            return shuffled.OrderBy(p => p.ClosingDate).ToList();
         }
     }
 }

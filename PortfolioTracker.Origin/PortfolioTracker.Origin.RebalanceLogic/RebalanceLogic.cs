@@ -26,7 +26,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             }
 
             var tasks = new List<Task>();
-            for (var i = 0; i < 10000; i++)
+
+            int iterationCount = 40000000 / dataSet.Portfolios.Count / dataSet.History.Count / (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
+
+            for (var i = 0; i < iterationCount; i++)
             {
                 tasks.Add(Task.Run(async () =>
                 {
@@ -67,8 +70,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             ConcurrentQueue<ScenarioResult> results = new ConcurrentQueue<ScenarioResult>();
 
-            await Task.WhenAll(dataSet.Portfolios.Select(portfolio => Task.Run(() =>
+            await Task.WhenAll(dataSet.Portfolios.Select(p => Task.Run(() =>
             {
+                var portfolio = p.Copy();
+
                 var symbols = portfolio.AllStocks.Select(a => a.Symbol).ToList();
 
                 var currentAllocations = symbols.Select(s => new StockAllocation

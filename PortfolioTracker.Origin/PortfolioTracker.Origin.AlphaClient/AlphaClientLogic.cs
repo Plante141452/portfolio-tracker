@@ -28,7 +28,7 @@ namespace PortfolioTracker.Origin.AlphaClient
             await Task.WhenAll(symbols.Select(s => Task.Run(async () =>
             {
                 var existingData = await _stockData.GetHistory(s);
-                var lastRecordedClose = existingData?.History?.FirstOrDefault()?.ClosingDate;
+                var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
                 if (lastRecordedClose != null && DateTime.Now.Subtract(lastRecordedClose.Value).TotalDays < 7)
                     histories.Enqueue(existingData);
                 else
@@ -49,13 +49,13 @@ namespace PortfolioTracker.Origin.AlphaClient
 
         private StockHistory MergeHistories(StockHistory updatedData, StockHistory existingData)
         {
-            var existingDataToMerge = existingData.History.Where(h => !updatedData.History.Any(uh => uh.ClosingDate.Equals(h.ClosingDate))).ToList();
+            var existingDataToMerge = existingData.History.Where(h => !updatedData.History.Any(uh => uh.ClosingDate.Date.Equals(h.ClosingDate.Date))).ToList();
 
             if (existingDataToMerge.Count == existingData.History.Count)
                 throw new Exception("Cannot merge historical data as they do not overlap.");
 
             updatedData.History.AddRange(existingDataToMerge);
-            updatedData.History = updatedData.History.OrderBy(h => h.ClosingDate).ToList();
+            updatedData.History = updatedData.History.OrderByDescending(h => h.ClosingDate).ToList();
 
             StockHistoryItem lastClosing = updatedData.History.First();
             foreach (var history in updatedData.History.Skip(1))
@@ -69,11 +69,15 @@ namespace PortfolioTracker.Origin.AlphaClient
 
         private StockHistory TransformSeries(StockTimeSeries series)
         {
-            var history = series.DataPoints.ToList();
+            List<StockDataPoint> history = series.DataPoints.ToList();
+
+            if (DateTime.Now.Subtract(history.First().Time).TotalDays < 1)
+                history = history.Skip(1).ToList();
+
             return new StockHistory
             {
                 Symbol = series.Symbol,
-                History = history.Skip(1).Select((dp, i) => new StockHistoryItem
+                History = history.Select((dp, i) => new StockHistoryItem
                 {
                     ClosingDate = dp.Time,
                     Volume = dp.Volume,
@@ -109,7 +113,7 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             foreach (var quote in existingQuotes)
             {
-                if (DateTime.Now.Subtract(quote.UpdatedDate).TotalMinutes > 5)
+                if (DateTime.Now.Subtract(quote.UpdatedDate).TotalMinutes > 0)
                     quotesToRefresh.Add(quote);
                 else
                 {

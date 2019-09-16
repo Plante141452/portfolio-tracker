@@ -33,11 +33,11 @@ namespace PortfolioTracker.Origin.AlphaClient
             {
                 lock (RequestWaitLock)
                 {
-                    while (RequestTimeLog.Count >= RequestsPerMinute)
+                    if (RequestTimeLog.Count >= RequestsPerMinute)
                     {
                         RequestTimeLog.TryDequeue(out var lastRequest);
                         double elapsedTime = DateTime.Now.Subtract(lastRequest).TotalSeconds;
-                        double wait = 60 - elapsedTime;
+                        double wait = 65 - elapsedTime;
                         if (wait > 0)
                             Thread.Sleep((int)(wait * 1000));
                     }

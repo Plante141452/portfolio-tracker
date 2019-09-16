@@ -96,7 +96,7 @@ namespace PortfolioTracker.Origin.DataAccess
             return new StockHistory
             {
                 Symbol = data.Symbol,
-                History = data.History
+                History = data.History.OrderByDescending(h => h.ClosingDate).ToList()
             };
         }
 
@@ -115,7 +115,7 @@ namespace PortfolioTracker.Origin.DataAccess
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
                     Symbol = history.Symbol,
-                    History = history.History
+                    History = history.History.OrderByDescending(h => h.ClosingDate).ToList()
                 };
 
                 await collection.InsertOneAsync(data);

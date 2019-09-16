@@ -13,10 +13,6 @@ namespace PortfolioTracker.Origin.Api.Controllers
         [HttpGet("{user}/Portfolios")]
         public ActionResult<List<Portfolio>> Get(int id)
         {
-            //new { Symbol = "DIS", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-            //new { Symbol = "SQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 3 },
-            //new { Symbol = "V", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
-            //new { Symbol = "MSFT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentAmount = 1 },
 
             var lowRiskStocks = new Category
             {
@@ -24,21 +20,9 @@ namespace PortfolioTracker.Origin.Api.Controllers
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "DIS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
-                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 3 },
+                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 4 },
                     new StockAllocation { Symbol = "V", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
                     new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 }
-                }
-            };
-
-            var highRisk = new Category
-            {
-                Name = "High Risk Stocks",
-                Stocks = new List<StockAllocation>
-                {
-                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 11 },
-                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 24 },
-                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 10 },
-                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 8 }
                 }
             };
 
@@ -86,7 +70,7 @@ namespace PortfolioTracker.Origin.Api.Controllers
                 Name = "Finance",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 14 }
+                    new StockAllocation { Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 21 }
                 }
             };
 
@@ -97,7 +81,8 @@ namespace PortfolioTracker.Origin.Api.Controllers
                 {
                     new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 7 },
                     new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 8 },
-                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 5 }
+                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 5 },
+                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 9 }
                 }
             };
 
@@ -106,10 +91,23 @@ namespace PortfolioTracker.Origin.Api.Controllers
                 Name = "Bonds",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 15m, CurrentShares = 22 },
-                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentShares = 4 }
+                    new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 13m, CurrentShares = 18 },
+                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 4 }
                 }
             };
+
+            var highRisk = new Category
+            {
+                Name = "High Risk Stocks",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 14 },
+                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 24 },
+                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 11 },
+                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 8 }
+                }
+            };
+
             List<Portfolio> portfolios = new List<Portfolio>
             {
                 new Portfolio
