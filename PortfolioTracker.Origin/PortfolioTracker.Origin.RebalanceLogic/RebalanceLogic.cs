@@ -5,11 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
+using PortfolioTracker.Origin.RebalanceLogic.Interfaces;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic
 {
-    public class RebalanceLogic
+    public class RebalanceLogic : IRebalanceLogic
     {
         public async Task<List<SimulationResult>> Simulate(RunScenarioDataSet dataSet)
         {

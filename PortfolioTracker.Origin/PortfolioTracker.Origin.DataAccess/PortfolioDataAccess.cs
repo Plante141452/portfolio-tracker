@@ -1,15 +1,16 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess.DataTypes;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PortfolioTracker.Origin.DataAccess
 {
-    public class PortfolioDataAccess
+    public class PortfolioDataAccess : IPortfolioDataAccess
     {
         private readonly IMongoClientWrapper _mongoWrapper;
 
@@ -20,26 +21,28 @@ namespace PortfolioTracker.Origin.DataAccess
 
         private const string PortfolioData = "portfolio_data";
 
-        public async Task<List<Portfolio>> GetPortfolio(string portfolioId)
+        public async Task<Portfolio> GetPortfolio(string portfolioId)
         {
             var collection = _mongoWrapper.StockDatabase.GetCollection<PortfolioData>(PortfolioData);
-            FilterDefinition<PortfolioData> filter = Builders<PortfolioData>.Filter.Empty;
+            FilterDefinition<PortfolioData> filter = Builders<PortfolioData>.Filter.Eq(p => p.Id, portfolioId);
 
             var data = await collection.FindAsync(filter);
-            var list = await data.ToListAsync();
+            var pData = await data.FirstOrDefaultAsync();
 
-            return list.Select(p => new Portfolio
+            return new Portfolio
             {
-                Id = p.Id,
-                CashOnHand = p.CashOnHand,
-                Categories = p.Categories,
-                Name = p.Name,
-                Stocks = p.Stocks
-            }).ToList();
+                Id = pData.Id,
+                CashOnHand = pData.CashOnHand,
+                Categories = pData.Categories,
+                Name = pData.Name,
+                Stocks = pData.Stocks
+            };
         }
 
-        public async Task SavePortfolios(List<Portfolio> portfolios)
+        public async Task<List<Portfolio>> SavePortfolios(List<Portfolio> portfolios)
         {
+            ConcurrentQueue<Portfolio> results = new ConcurrentQueue<Portfolio>();
+
             var collection = _mongoWrapper.StockDatabase.GetCollection<PortfolioData>(PortfolioData);
 
             var create = portfolios.Where(p => string.IsNullOrWhiteSpace(p.Id)).ToList();
@@ -57,6 +60,9 @@ namespace PortfolioTracker.Origin.DataAccess
                 }).ToList();
 
                 await collection.InsertManyAsync(docs);
+
+                foreach (var doc in docs)
+                    results.Enqueue(doc);
             }
 
             if (update.Any())
@@ -64,59 +70,22 @@ namespace PortfolioTracker.Origin.DataAccess
                 await Task.WhenAll(update.Select(p => Task.Run(async () =>
                 {
                     var updateFilter = Builders<PortfolioData>.Filter.Eq(x => x.Id, p.Id);
-                    await collection.ReplaceOneAsync(updateFilter, new PortfolioData
+
+                    var replacement = new PortfolioData
                     {
                         Id = p.Id,
                         CashOnHand = p.CashOnHand,
                         Categories = p.Categories,
                         Name = p.Name,
                         Stocks = p.Stocks
-                    });
+                    };
+
+                    await collection.ReplaceOneAsync(updateFilter, replacement);
+                    results.Enqueue(replacement);
                 })));
             }
-        }
 
-        //public async Task<StockHistory> GetHistory(string symbol)
-        //{
-        //    var collection = _mongoWrapper.StockDatabase.GetCollection<StockHistoryData>(StockHistoryData);
-        //    FilterDefinition<StockHistoryData> filter = Builders<StockHistoryData>.Filter.Eq(s => s.Symbol, symbol);
-        //    var filteredData = await collection.FindAsync(filter);
-        //    var data = await filteredData.FirstOrDefaultAsync();
-        //    if (data == null)
-        //        return null;
-        //
-        //    return new StockHistory
-        //    {
-        //        Symbol = data.Symbol,
-        //        History = data.History.OrderByDescending(h => h.ClosingDate).ToList()
-        //    };
-        //}
-        //
-        //public async Task SaveHistory(StockHistory history)
-        //{
-        //    var collection = _mongoWrapper.StockDatabase.GetCollection<StockHistoryData>(StockHistoryData);
-        //
-        //    FilterDefinition<StockHistoryData> filter = Builders<StockHistoryData>.Filter.Eq(s => s.Symbol, history.Symbol);
-        //    var filteredData = await collection.FindAsync(filter);
-        //
-        //    var existing = filteredData.FirstOrDefault();
-        //
-        //    if (existing == null)
-        //    {
-        //        var data = new StockHistoryData
-        //        {
-        //            Id = ObjectId.GenerateNewId().ToString(),
-        //            Symbol = history.Symbol,
-        //            History = history.History.OrderByDescending(h => h.ClosingDate).ToList()
-        //        };
-        //
-        //        await collection.InsertOneAsync(data);
-        //    }
-        //    else
-        //    {
-        //        UpdateDefinition<StockHistoryData> update = Builders<StockHistoryData>.Update.Set(s => s.History, history.History);
-        //        await collection.UpdateOneAsync(filter, update);
-        //    }
-        //}
+            return results.ToList();
+        }
     }
 }

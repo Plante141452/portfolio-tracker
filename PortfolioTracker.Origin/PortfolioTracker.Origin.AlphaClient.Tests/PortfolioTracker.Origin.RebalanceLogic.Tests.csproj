@@ -124,7 +124,7 @@
       <Name>PortfolioTracker.Origin.DataAccess</Name>
     </ProjectReference>
     <ProjectReference Include="..\PortfolioTracker.Origin.RebalanceLogic\PortfolioTracker.Origin.RebalanceLogic.csproj">
-      <Project>{4f23d2d9-e0c1-4f05-9eb0-44656eb7815f}</Project>
+      <Project>{BFB76738-74DC-41BC-9D1B-1FC344DD7310}</Project>
       <Name>PortfolioTracker.Origin.RebalanceLogic</Name>
     </ProjectReference>
   </ItemGroup>

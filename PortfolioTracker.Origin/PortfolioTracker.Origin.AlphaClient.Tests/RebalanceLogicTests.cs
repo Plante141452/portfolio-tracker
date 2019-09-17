@@ -16,12 +16,15 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
     {
         private AlphaClientLogic _alphaClient;
         private RebalanceLogic _rebalanceLogic;
+        private PortfolioDataAccess _portfolioDataAccess;
 
         [SetUp]
         public void Setup()
         {
             var client = new AlphaClientWrapper(new ApiKeyProvider());
-            var stockDataAccess = new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider()));
+            var mongoWrapper = new MongoClientWrapper(new ConnectionStringProvider());
+            var stockDataAccess = new StockDataAccess(mongoWrapper);
+            _portfolioDataAccess = new PortfolioDataAccess(mongoWrapper);
             _alphaClient = new AlphaClientLogic(client, stockDataAccess);
             _rebalanceLogic = new RebalanceLogic();
         }
@@ -259,7 +262,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 4 },
-                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 10 }
+                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 11 }
                 }
             };
 
@@ -308,6 +311,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             Portfolio portfolio = new Portfolio
             {
+                Name = "Default",
                 CashOnHand = 1.00m,
                 Categories = new List<Category>
                 {

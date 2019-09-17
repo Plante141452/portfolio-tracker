@@ -7,6 +7,6 @@ namespace PortfolioTracker.Origin.DataAccess.DataTypes
     public class PortfolioData : Portfolio
     {
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public override string Id { get; set; }
     }
 }

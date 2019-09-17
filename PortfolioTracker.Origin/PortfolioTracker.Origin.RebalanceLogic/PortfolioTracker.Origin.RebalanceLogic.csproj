@@ -1,65 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F23D2D9-E0C1-4F05-9EB0-44656EB7815F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PortfolioTracker.Origin.RebalanceLogic</RootNamespace>
-    <AssemblyName>PortfolioTracker.Origin.RebalanceLogic</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Models\SimulationResult.cs" />
-    <Compile Include="RebalanceLogic.cs" />
-    <Compile Include="Models\RebalanceAction.cs" />
-    <Compile Include="Models\RebalanceActionTypeEnum.cs" />
-    <Compile Include="Models\RebalanceDataSet.cs" />
-    <Compile Include="Models\RebalanceItem.cs" />
-    <Compile Include="Models\RebalancePercentageItem.cs" />
-    <Compile Include="Models\RebalanceResult.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\RunScenarioDataSet.cs" />
-    <Compile Include="Models\ScenarioResult.cs" />
-    <Compile Include="SimulationExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PortfolioTracker.Origin.AlphaClient\PortfolioTracker.Origin.AlphaClient.csproj">
-      <Project>{294CCEF7-F44C-4351-AD0D-2897AAD9666C}</Project>
-      <Name>PortfolioTracker.Origin.AlphaClient</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj">
-      <Project>{E82488A7-F5D3-404F-8BB9-5E525DB52950}</Project>
-      <Name>PortfolioTracker.Origin.Common.Models</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>
