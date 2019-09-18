@@ -134,12 +134,12 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         public async Task Optimize()
         {
             var portfolio = await _portfolioDataAccess.GetPortfolio("5d80d0587d2d4657d8e1fe8f");
+            portfolio.Categories = portfolio.Categories.Where(c => !c.Name.Contains("Risk")).ToList();
+
             var symbols = portfolio.AllStocks.Select(st => st.Symbol).Distinct().ToList();
             var relevantPeriods = await _alphaClient.GetPortfolioHistory(symbols);
 
             relevantPeriods = relevantPeriods.Where((p, i) => i > relevantPeriods.Count / 2).ToList();
-
-            portfolio.Categories = portfolio.Categories.Where(c => !c.Name.Contains("Risk")).ToList();
 
             Assert.IsTrue(portfolio.AllStocks.All(s => s.DesiredAmountType == AllocationTypeEnum.Percentage));
 
