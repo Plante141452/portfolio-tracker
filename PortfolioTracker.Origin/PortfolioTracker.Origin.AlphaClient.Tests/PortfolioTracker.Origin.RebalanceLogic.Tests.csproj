@@ -115,6 +115,10 @@
       <Project>{294ccef7-f44c-4351-ad0d-2897aad9666c}</Project>
       <Name>PortfolioTracker.Origin.AlphaClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Logic\PortfolioTracker.Origin.Common.Logic.csproj">
+      <Project>{5396744d-0d96-460a-8f11-2e37fb02d873}</Project>
+      <Name>PortfolioTracker.Origin.Common.Logic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj">
       <Project>{E82488A7-F5D3-404F-8BB9-5E525DB52950}</Project>
       <Name>PortfolioTracker.Origin.Common.Models</Name>

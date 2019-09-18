@@ -15,7 +15,8 @@ namespace PortfolioTracker.Origin.Api.Controllers
 
         public StocksController()
         {
-            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(new ApiKeyProvider()), new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider())));
+            var clientFactory = new AlphaVantageStocksClientFactory(new ApiKeyProvider());
+            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider())));
         }
 
         // GET api/values/5

@@ -9,17 +9,15 @@ namespace PortfolioTracker.Origin.AlphaClient
 {
     public class AlphaClientWrapper : IAlphaClientWrapper
     {
-        private readonly Lazy<AlphaVantageStocksClient> _clientLazy;
+        private readonly IAlphaVantageStocksClientFactory _clientFactory;
 
-        private AlphaVantageStocksClient Client => _clientLazy.Value;
-
-        public AlphaClientWrapper(IApiKeyProvider apiKeyProvider)
+        public AlphaClientWrapper(IAlphaVantageStocksClientFactory clientFactory)
         {
-            _clientLazy = new Lazy<AlphaVantageStocksClient>(() => new AlphaVantageStocksClient(apiKeyProvider.AlphaVantageKey));
+            _clientFactory = clientFactory;
         }
 
         private const int RequestsPerMinute = 5;
-        private static readonly ConcurrentQueue<DateTime> RequestTimeLog = new ConcurrentQueue<DateTime>();
+        private static readonly ConcurrentQueue<DateTimeOffset> RequestTimeLog = new ConcurrentQueue<DateTimeOffset>();
         private static readonly object RequestWaitLock = new object();
 
         public async Task<T> Execute<T>(Func<AlphaVantageStocksClient, Task<T>> task)
@@ -36,16 +34,17 @@ namespace PortfolioTracker.Origin.AlphaClient
                     if (RequestTimeLog.Count >= RequestsPerMinute)
                     {
                         RequestTimeLog.TryDequeue(out var lastRequest);
-                        double elapsedTime = DateTime.UtcNow.Subtract(lastRequest).TotalSeconds;
-                        double wait = 65 - elapsedTime;
+                        var elapsedTime = DateTimeOffset.UtcNow.Subtract(lastRequest).TotalSeconds;
+                        var wait = 65 - elapsedTime;
                         if (wait > 0)
                             Thread.Sleep((int)(wait * 1000));
                     }
 
-                    RequestTimeLog.Enqueue(DateTime.UtcNow);
+                    RequestTimeLog.Enqueue(DateTimeOffset.UtcNow);
                 }
 
-                return func(Client);
+                var client = _clientFactory.GetClient();
+                return func(client);
             });
         }
     }

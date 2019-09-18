@@ -29,7 +29,7 @@ namespace PortfolioTracker.Origin.AlphaClient
             {
                 var existingData = await _stockData.GetHistory(s);
                 var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
-                if (lastRecordedClose != null && DateTime.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
+                if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
                     histories.Enqueue(existingData);
                 else
                 {
@@ -71,7 +71,7 @@ namespace PortfolioTracker.Origin.AlphaClient
         {
             List<StockDataPoint> history = series.DataPoints.ToList();
 
-            if (DateTime.UtcNow.Subtract(history.First().Time).TotalDays < 1)
+            if (DateTimeOffset.UtcNow.Subtract(history.First().Time).TotalDays < 1)
                 history = history.Skip(1).ToList();
 
             return new StockHistory
@@ -113,7 +113,7 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             foreach (var quote in existingQuotes)
             {
-                if (DateTime.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
+                if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
                     quotesToRefresh.Add(quote);
                 else
                 {
@@ -133,7 +133,7 @@ namespace PortfolioTracker.Origin.AlphaClient
                     Symbol = q.Symbol,
                     Price = q.Price,
                     QuoteDate = q.Time,
-                    UpdatedDate = DateTime.UtcNow,
+                    UpdatedDate = DateTimeOffset.UtcNow,
                     Volume = q.Volume ?? 0
                 }).ToList();
 

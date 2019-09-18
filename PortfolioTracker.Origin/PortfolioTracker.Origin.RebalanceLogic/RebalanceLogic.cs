@@ -14,7 +14,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
     {
         public async Task<List<SimulationResult>> Simulate(RunScenarioDataSet dataSet)
         {
-            ConcurrentDictionary<Portfolio, List<ScenarioResult>> mapping = new ConcurrentDictionary<Portfolio, List<ScenarioResult>>();
+            ConcurrentDictionary<Portfolio, ConcurrentQueue<ScenarioResult>> mapping = new ConcurrentDictionary<Portfolio, ConcurrentQueue<ScenarioResult>>();
 
             var results = await RunScenario(dataSet);
 
@@ -23,12 +23,16 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 var index = results.IndexOf(scenarioResult);
                 var portfolio = dataSet.Portfolios[index];
 
-                mapping[portfolio] = new List<ScenarioResult> { scenarioResult };
+                mapping[portfolio] = new ConcurrentQueue<ScenarioResult>();
+                mapping[portfolio].Enqueue(scenarioResult);
             }
 
             var tasks = new List<Task>();
+            
+            int stockCount = (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
+            int iterationCount = 50000000 / (dataSet.Portfolios.Count * stockCount * dataSet.History.Count);
 
-            int iterationCount = 40000000 / dataSet.Portfolios.Count / dataSet.History.Count / (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
+            var start = DateTime.Now;
 
             for (var i = 0; i < iterationCount; i++)
             {
@@ -50,17 +54,20 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                         var index = nextResults.IndexOf(scenarioResult);
                         var portfolio = dataSet.Portfolios[index];
 
-                        mapping[portfolio].Add(scenarioResult);
+                        mapping[portfolio].Enqueue(scenarioResult);
                     }
                 }));
             }
 
             await Task.WhenAll(tasks);
 
+            var duration = DateTime.Now.Subtract(start).TotalSeconds;
+            Console.WriteLine($"{dataSet.Portfolios.Count} portfolios, {dataSet.History.Count} weeks, {stockCount} stocks took {duration}s");
+            
             return mapping.Select(kp => new SimulationResult
             {
                 Portfolio = kp.Key,
-                Results = kp.Value
+                Results = kp.Value.ToList()
             }).ToList();
         }
 
@@ -131,7 +138,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 var totalCashInvested = (dataSet.InitialInvestment + dataSet.CashInfluxAmount * (dataSet.History.Count - 1));
                 var result = new ScenarioResult
                 {
-                    PercentIncrease = finalPortfolioValue / totalCashInvested,
+                    PercentIncrease = (finalPortfolioValue / totalCashInvested) - 1,
                     StartDate = dataSet.History.First().ClosingDate,
                     EndDate = lastPeriod.ClosingDate,
                     FinalPortfolioValue = finalPortfolioValue,

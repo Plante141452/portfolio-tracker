@@ -38,19 +38,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 PortfolioHistoryPeriod value = shuffled[k];
 
                 value.ClosingDate = shuffled[n].ClosingDate;
-                value.ClosingDate = originalKDate;
-
-                value.Stocks = shuffled[n].Stocks.Select(s => new StockHistoricalPeriod
-                {
-                    Symbol = s.Symbol,
-                    PeriodData = new StockHistoryItem
-                    {
-                        AdjustedClose = s.PeriodData.AdjustedClose,
-                        AdjustedPercentChanged = s.PeriodData.AdjustedPercentChanged,
-                        ClosingDate = s.PeriodData.ClosingDate,
-                        Volume = s.PeriodData.Volume
-                    }
-                }).ToList();
+                shuffled[n].ClosingDate = originalKDate;
 
                 shuffled[k] = shuffled[n];
                 shuffled[n] = value;
@@ -64,8 +52,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 foreach (var stock in period.Stocks)
                 {
                     var lastStockPeriodData = lastPeriod.Stocks.First(s => s.Symbol == stock.Symbol).PeriodData;
-                    if (lastStockPeriodData.AdjustedPercentChanged != 0)
-                        stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose / lastStockPeriodData.AdjustedPercentChanged;
+                    if (lastStockPeriodData.AdjustedPercentChanged > .0001m)
+                        stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose * lastStockPeriodData.AdjustedPercentChanged;
                     else
                         stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose;
                 }
@@ -73,7 +61,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                 lastPeriod = period;
             }
 
-            return shuffled.OrderBy(p => p.ClosingDate).ToList();
+            var adjusted = shuffled.OrderBy(p => p.ClosingDate).ToList();
+            return adjusted;
         }
     }
 }
