@@ -136,19 +136,19 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             var getCategories = Task.Run(async () =>
             {
+                if (cat.Categories == null || !cat.Categories.Any())
+                    return cat.Categories;
+
                 var categories = new List<Category>();
-                if (cat.Categories != null && cat.Categories.Any())
+                var optimizeCategories = cat.Categories.Select(OptimizeCategory);
+
+                foreach (var optimizeCategory in optimizeCategories)
                 {
-                    var optimizeCategories = cat.Categories.Select(OptimizeCategory);
+                    var optimized = await optimizeCategory;
 
-                    foreach (var optimizeCategory in optimizeCategories)
-                    {
-                        var optimized = await optimizeCategory;
+                    Clean(optimized);
 
-                        Clean(optimized);
-
-                        categories.Add(optimized);
-                    }
+                    categories.Add(optimized);
                 }
 
                 return categories;
@@ -159,7 +159,6 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             if (cat.Stocks == null || !cat.Stocks.Any())
             {
                 cat.Categories = optimizedCategories;
-                cat.Stocks = new List<StockAllocation>();
                 return cat;
             }
 
@@ -209,7 +208,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
 
             var targetedStock = stocks.First();
             var remainingStocks = stocks.Skip(1).ToList();
-            
+
             for (int i = 0; i <= allotedPercent; i++)
             {
                 if (remainingStocks.Count > 1)
@@ -242,7 +241,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         [Test]
         public async Task Optimize()
         {
-            var portfolio = await _portfolioDataAccess.GetPortfolio("5d80d0587d2d4657d8e1fe8f");
+            //Portfolio 1: 5d80d0587d2d4657d8e1fe8f
+            //Portfolio 2: 5d83c1d67d2d46642026e749
+            var portfolio = await _portfolioDataAccess.GetPortfolio("5d83c1d67d2d46642026e749");
+
+            portfolio.Categories = portfolio.Categories.Where(c => !c.Name.Contains("Risk")).ToList();
 
             var symbols = portfolio.AllStocks.Select(p => p.Symbol).ToList();
 
@@ -542,7 +545,52 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 }
             };
 
-            await _portfolioDataAccess.SavePortfolios(new List<Portfolio> { portfolio });
+            var result = await _portfolioDataAccess.SavePortfolios(new List<Portfolio> { portfolio });
+            Console.WriteLine($"Portfolio Id: {result.First().Id}");
+        }
+
+        [Test]
+        public async Task UpdatePortfolio2()
+        {
+            var allEtFs = new Category
+            {
+                Name = "All",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SOXL", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "CIBR", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 13 },
+                    new StockAllocation { Symbol = "MJ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 14 },
+                    new StockAllocation { Symbol = "TAN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 11 },
+                    new StockAllocation { Symbol = "ICLN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 31 },
+                    new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 11 },
+                    new StockAllocation { Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 6m, CurrentShares = 23 },
+                    new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 7 },
+                    new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 8 },
+                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 5 },
+                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 14 },
+                    new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 13m, CurrentShares = 18 },
+                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .5m, CurrentShares = 15 },
+                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 24 },
+                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 11 },
+                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 10 }
+                }
+            };
+
+            Portfolio portfolio = new Portfolio
+            {
+                //Id = "5d80d0587d2d4657d8e1fe8f",
+                Name = "Default",
+                CashOnHand = 1.37m,
+                Categories = new List<Category>
+                {
+                    allEtFs
+                }
+            };
+
+            var result = await _portfolioDataAccess.SavePortfolios(new List<Portfolio> { portfolio });
+            Console.WriteLine($"Portfolio Id: {result.First().Id}");
         }
     }
 }
