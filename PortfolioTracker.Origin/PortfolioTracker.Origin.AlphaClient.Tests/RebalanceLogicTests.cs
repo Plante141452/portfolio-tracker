@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using PortfolioTracker.Origin.AlphaClient;
-using PortfolioTracker.Origin.Common.Logic.Extensions;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.DataAccess;
@@ -130,87 +129,128 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             return category;
         }
 
+        public async Task<T> OptimizeCategory<T>(T cat) where T : Category
+        {
+            var categorySymbols = cat.AllStocks.Select(st => st.Symbol).Distinct().ToList();
+            var getCategoryPeriods = _alphaClient.GetPortfolioHistory(categorySymbols);
+
+            var getCategories = Task.Run(async () =>
+            {
+                var categories = new List<Category>();
+                if (cat.Categories != null && cat.Categories.Any())
+                {
+                    var optimizeCategories = cat.Categories.Select(OptimizeCategory);
+
+                    foreach (var optimizeCategory in optimizeCategories)
+                    {
+                        var optimized = await optimizeCategory;
+
+                        Clean(optimized);
+
+                        categories.Add(optimized);
+                    }
+                }
+
+                return categories;
+            });
+
+            var optimizedCategories = await getCategories;
+
+            if (cat.Stocks == null || !cat.Stocks.Any())
+            {
+                cat.Categories = optimizedCategories;
+                cat.Stocks = new List<StockAllocation>();
+                return cat;
+            }
+
+            var stockPercent = (int)cat.Stocks.Sum(s => s.DesiredAmount);
+            var stockCombinations = GetPossibleStockCombinations(stockPercent, cat.Stocks.Copy());
+
+            var portfolios = stockCombinations.Select((allocations, i) => new Portfolio
+            {
+                Id = i.ToString(),
+                Name = i.ToString(),
+                CashOnHand = 0,
+                Stocks = allocations.Where(a => a.DesiredAmount > 0).Copy(),
+                Categories = optimizedCategories
+            }).ToList();
+
+            RunScenarioDataSet dataSet = new RunScenarioDataSet
+            {
+                InitialInvestment = 10000,
+                CashInfluxAmount = 150,
+                CashInfluxCadence = CadenceTypeEnum.Weekly,
+                Portfolios = portfolios,
+                History = await getCategoryPeriods
+            };
+
+            var result = await _rebalanceLogic.Simulate(dataSet);
+
+            var winner = result.Aggregate((r1, r2) => r1.Results.Average(r => r.PercentIncrease) > r2.Results.Average(r => r.PercentIncrease) ? r1 : r2);
+
+            cat.Categories = winner.Portfolio.Categories.Copy();
+            cat.Stocks = winner.Portfolio.Stocks.Copy();
+
+            return cat;
+        }
+
+        public List<List<StockAllocation>> GetPossibleStockCombinations(int allotedPercent, List<StockAllocation> stocks)
+        {
+            var results = new List<List<StockAllocation>>();
+
+            if (stocks.Count == 1)
+            {
+                var returnStocks = stocks.Copy();
+                var onlyStock = returnStocks.Single();
+                onlyStock.DesiredAmount = allotedPercent;
+                results.Add(returnStocks);
+                return results;
+            }
+
+            var targetedStock = stocks.First();
+            var remainingStocks = stocks.Skip(1).ToList();
+            
+            for (int i = 0; i <= allotedPercent; i++)
+            {
+                if (remainingStocks.Count > 1)
+                {
+                    var innerPortfolios = GetPossibleStockCombinations(allotedPercent - i, remainingStocks);
+                    foreach (var innerPortfolio in innerPortfolios)
+                    {
+                        var thisAllocation = targetedStock.Copy();
+                        thisAllocation.DesiredAmount = i;
+                        innerPortfolio.Add(thisAllocation);
+                    }
+
+                    results.AddRange(innerPortfolios);
+                }
+                else
+                {
+                    var thisAllocation = targetedStock.Copy();
+                    thisAllocation.DesiredAmount = i;
+
+                    var thatAllocation = remainingStocks.Single().Copy();
+                    thatAllocation.DesiredAmount = allotedPercent - i;
+                    results.Add(new List<StockAllocation> { thatAllocation, thisAllocation });
+                }
+            }
+
+            //Distinct...
+            return results.Where((allocations, i) => i == results.FindIndex(r => r.All(a1 => allocations.First(a2 => a2.Symbol == a1.Symbol).DesiredAmount == a1.DesiredAmount))).ToList();
+        }
+
         [Test]
         public async Task Optimize()
         {
             var portfolio = await _portfolioDataAccess.GetPortfolio("5d80d0587d2d4657d8e1fe8f");
-            portfolio.Categories = portfolio.Categories.Where(c => !c.Name.Contains("Risk")).ToList();
 
-            var symbols = portfolio.AllStocks.Select(st => st.Symbol).Distinct().ToList();
-            var relevantPeriods = await _alphaClient.GetPortfolioHistory(symbols);
+            var symbols = portfolio.AllStocks.Select(p => p.Symbol).ToList();
 
-            relevantPeriods = relevantPeriods.Where((p, i) => i > relevantPeriods.Count / 2).ToList();
+            var getHistory = _alphaClient.GetPortfolioHistory(symbols);
 
-            Assert.IsTrue(portfolio.AllStocks.All(s => s.DesiredAmountType == AllocationTypeEnum.Percentage));
+            var result = await OptimizeCategory(portfolio);
 
-            foreach (var category in portfolio.Categories)
-            {
-                var categorySymbols = category.AllStocks.Select(st => st.Symbol).Distinct().ToList();
-                var categoryPeriods = await _alphaClient.GetPortfolioHistory(categorySymbols);
-
-                var categoryPortfolios = new List<Portfolio>
-                {
-                    new Portfolio
-                    {
-                        Categories = category.Categories.Clone(),
-                        Stocks = category.Stocks.Clone(),
-                        Name = category.Name
-                    }
-                };
-
-                var totalPercent = (int)category.AllStocks.Sum(s => s.DesiredAmount);
-                var stockCount = category.AllStocks.Count;
-
-                for (int i = 0; i < stockCount * 10; i++)
-                {
-                    var remainingPercent = totalPercent;
-                    var rand = new Random();
-                    for (int j = 0; j < stockCount; j++)
-                    {
-                        var stock = category.AllStocks[j];
-                        if (j == stockCount - 1)
-                            stock.DesiredAmount = remainingPercent;
-                        else
-                        {
-                            var newAmount = rand.Next(remainingPercent);
-                            stock.DesiredAmount = newAmount;
-                            remainingPercent -= newAmount;
-                        }
-                    }
-
-                    var newPortfolio = new Portfolio
-                    {
-                        Name = category.Name,
-                        Categories = category.Categories.Clone(),
-                        Stocks = category.Stocks.Clone(),
-                    };
-
-                    var cleaned = Clean(newPortfolio);
-
-                    categoryPortfolios.Add(cleaned);
-                }
-
-                RunScenarioDataSet dataSet = new RunScenarioDataSet
-                {
-                    InitialInvestment = 10000,
-                    CashInfluxAmount = 150,
-                    CashInfluxCadence = CadenceTypeEnum.Weekly,
-                    Portfolios = categoryPortfolios,
-                    History = categoryPeriods
-                };
-
-                var result = await _rebalanceLogic.Simulate(dataSet);
-
-                var bestCategory = result.Aggregate((r1, r2) => r1.Results.Average(r => r.PercentIncrease) > r2.Results.Average(r => r.PercentIncrease) ? r1 : r2);
-                foreach (var categoryStock in bestCategory.Portfolio.AllStocks)
-                {
-                    var portfolioStock = portfolio.AllStocks.Find(s => s.Symbol == categoryStock.Symbol);
-                    if (portfolioStock != null)
-                        portfolioStock.DesiredAmount = categoryStock.DesiredAmount;
-                }
-            }
-
-            var portfolioSummary = string.Join("\n", portfolio.AllStocks.Select(s => $"{s.Symbol}: {s.DesiredAmount}%"));
+            var portfolioSummary = string.Join("\n", result.AllStocks.Select(s => $"{s.Symbol}: {s.DesiredAmount}%"));
             Console.WriteLine(portfolioSummary);
 
             var finalSet = new RunScenarioDataSet
@@ -218,8 +258,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 InitialInvestment = 10000,
                 CashInfluxAmount = 150,
                 CashInfluxCadence = CadenceTypeEnum.Weekly,
-                Portfolios = new List<Portfolio> { portfolio },
-                History = relevantPeriods
+                Portfolios = new List<Portfolio> { result },
+                History = await getHistory
             };
 
             var finalResult = await _rebalanceLogic.Simulate(finalSet);
@@ -379,9 +419,17 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "DIS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
-                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 4 },
-                    new StockAllocation { Symbol = "V", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
-                    new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 }
+                    new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 },
+                    new StockAllocation { Symbol = "V", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 1 }
+                }
+            };
+            var mediumRiskStocks = new Category
+            {
+                Name = "Medium Risk Stocks",
+                Stocks = new List<StockAllocation>
+                {
+                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1.5m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "ROKU", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1.5m, CurrentShares = 0 }
                 }
             };
 
@@ -460,7 +508,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "High Risk Stocks",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 15 },
+                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .5m, CurrentShares = 15 },
                     new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 24 },
                     new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 11 },
                     new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 10 }
@@ -475,6 +523,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Categories = new List<Category>
                 {
                     lowRiskStocks,
+                    mediumRiskStocks,
                     new Category
                     {
                         Name = "ETFs",

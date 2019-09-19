@@ -14,23 +14,28 @@ namespace PortfolioTracker.Origin.RebalanceLogic
     {
         public async Task<List<SimulationResult>> Simulate(RunScenarioDataSet dataSet)
         {
-            ConcurrentDictionary<Portfolio, ConcurrentQueue<ScenarioResult>> mapping = new ConcurrentDictionary<Portfolio, ConcurrentQueue<ScenarioResult>>();
+            for (int d = 0; d < dataSet.Portfolios.Count; d++)
+            {
+                dataSet.Portfolios[d].Id = d.ToString();
+            }
+
+            ConcurrentDictionary<string, ConcurrentQueue<ScenarioResult>> mapping = new ConcurrentDictionary<string, ConcurrentQueue<ScenarioResult>>();
 
             var results = await RunScenario(dataSet);
 
             foreach (var scenarioResult in results)
             {
                 var index = results.IndexOf(scenarioResult);
-                var portfolio = dataSet.Portfolios[index];
+                var portfolio = dataSet.Portfolios[index].Copy();
 
-                mapping[portfolio] = new ConcurrentQueue<ScenarioResult>();
-                mapping[portfolio].Enqueue(scenarioResult);
+                mapping[portfolio.Id] = new ConcurrentQueue<ScenarioResult>();
+                mapping[portfolio.Id].Enqueue(scenarioResult);
             }
 
             var tasks = new List<Task>();
-            
+
             int stockCount = (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
-            int iterationCount = 50000000 / (dataSet.Portfolios.Count * stockCount * dataSet.History.Count);
+            int iterationCount = 500000 / (dataSet.Portfolios.Count * stockCount * dataSet.History.Count);
 
             var start = DateTime.Now;
 
@@ -45,7 +50,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                         CashInfluxCadence = dataSet.CashInfluxCadence,
                         History = revisedHistory,
                         InitialInvestment = dataSet.InitialInvestment,
-                        Portfolios = dataSet.Portfolios
+                        Portfolios = dataSet.Portfolios.Copy()
                     };
 
                     var nextResults = await RunScenario(revisedDataSet);
@@ -54,7 +59,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                         var index = nextResults.IndexOf(scenarioResult);
                         var portfolio = dataSet.Portfolios[index];
 
-                        mapping[portfolio].Enqueue(scenarioResult);
+                        mapping[portfolio.Id].Enqueue(scenarioResult);
                     }
                 }));
             }
@@ -63,10 +68,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             var duration = DateTime.Now.Subtract(start).TotalSeconds;
             Console.WriteLine($"{dataSet.Portfolios.Count} portfolios, {dataSet.History.Count} weeks, {stockCount} stocks took {duration}s");
-            
+
             return mapping.Select(kp => new SimulationResult
             {
-                Portfolio = kp.Key,
+                Portfolio = dataSet.Portfolios.First(p => kp.Key == p.Id),
                 Results = kp.Value.ToList()
             }).ToList();
         }

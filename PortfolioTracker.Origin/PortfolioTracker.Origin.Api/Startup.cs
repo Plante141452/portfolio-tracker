@@ -42,7 +42,7 @@ namespace PortfolioTracker.Origin.Api
             }
 
             app.UseHttpsRedirection();
-            app.UseCors(policy => policy.AllowAnyOrigin());
+            app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader());
             app.UseMvc();
         }
     }

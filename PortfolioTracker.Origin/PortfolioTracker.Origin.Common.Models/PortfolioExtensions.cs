@@ -1,18 +1,30 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PortfolioTracker.Origin.Common.Models
 {
     public static class PortfolioExtensions
     {
+        public static List<Portfolio> Copy(this IEnumerable<Portfolio> portfolios)
+        {
+            return portfolios?.Select(Copy).ToList();
+        }
+
         public static Portfolio Copy(this Portfolio portfolio)
         {
             return new Portfolio
             {
+                Id = portfolio.Id,
                 Name = portfolio.Name,
-                Categories = portfolio.Categories?.Select(c => Copy((Category)c)).ToList(),
-                Stocks = portfolio.Stocks?.Select(s => s.Copy()).ToList(),
+                Categories = portfolio.Categories.Copy(),
+                Stocks = portfolio.Stocks.Copy(),
                 CashOnHand = portfolio.CashOnHand
             };
+        }
+
+        public static List<Category> Copy(this IEnumerable<Category> categories)
+        {
+            return categories?.Select(Copy).ToList();
         }
 
         public static Category Copy(this Category category)
@@ -23,6 +35,11 @@ namespace PortfolioTracker.Origin.Common.Models
                 Categories = category.Categories?.Select(c => c.Copy()).ToList(),
                 Stocks = category.Stocks?.Select(s => s.Copy()).ToList()
             };
+        }
+
+        public static List<StockAllocation> Copy(this IEnumerable<StockAllocation> stocks)
+        {
+            return stocks?.Select(Copy).ToList();
         }
 
         public static StockAllocation Copy(this StockAllocation stock)
