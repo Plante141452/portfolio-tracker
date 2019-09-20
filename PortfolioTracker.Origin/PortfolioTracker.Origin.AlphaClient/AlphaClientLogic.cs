@@ -127,7 +127,7 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             if (symbolsToRetrieve.Any())
             {
-                var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbols.ToArray()));
+                var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbolsToRetrieve.ToArray()));
                 var mappedQuotes = quotes.Select(q => new Quote
                 {
                     Symbol = q.Symbol,
