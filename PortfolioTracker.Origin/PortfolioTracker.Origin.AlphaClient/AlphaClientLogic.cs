@@ -7,18 +7,21 @@ using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
+using PortfolioTracker.Origin.IEX;
 
 namespace PortfolioTracker.Origin.AlphaClient
 {
     public class AlphaClientLogic : IAlphaClientLogic
     {
-        private IAlphaClientWrapper _alphaClient;
+        private readonly IIEXClient _iexClient;
+        private readonly IAlphaClientWrapper _alphaClient;
         private readonly IStockDataAccess _stockData;
 
-        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IStockDataAccess stockData)
+        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IStockDataAccess stockData, IIEXClient iexClient)
         {
             _alphaClient = alphaClient;
             _stockData = stockData;
+            _iexClient = iexClient;
         }
 
         public async Task<List<StockHistory>> GetHistory(List<string> symbols)
@@ -113,7 +116,7 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             foreach (var quote in existingQuotes)
             {
-                if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
+                if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 5)
                     quotesToRefresh.Add(quote);
                 else
                 {
@@ -123,21 +126,24 @@ namespace PortfolioTracker.Origin.AlphaClient
                 }
             }
 
-            var symbolsToRetrieve = quotesToRefresh.Select(q => q.Symbol).Union(symbols).Distinct();
+            var symbolsToRetrieve = quotesToRefresh.Select(q => q.Symbol).Union(symbols).Distinct().ToList();
 
             if (symbolsToRetrieve.Any())
             {
-                var quotes = await _alphaClient.Execute(svc => svc.RequestBatchQuotesAsync(symbolsToRetrieve.ToArray()));
-                var mappedQuotes = quotes.Select(q => new Quote
+                ConcurrentQueue<Quote> quotes = new ConcurrentQueue<Quote>();
+                await Task.WhenAll(symbolsToRetrieve.Select(symbol => Task.Run(async () =>
                 {
-                    Symbol = q.Symbol,
-                    Price = q.Price,
-                    QuoteDate = q.Time,
-                    UpdatedDate = DateTimeOffset.UtcNow,
-                    Volume = q.Volume ?? 0
-                }).ToList();
+                    var quote = await _iexClient.GetQuote(symbol);
+                    quotes.Enqueue(new Quote
+                    {
+                        Symbol = quote.symbol,
+                        Price = quote.latestPrice,
+                        QuoteDate = quote.latestUpdate,
+                        UpdatedDate = DateTimeOffset.UtcNow
+                    });
+                })));
 
-                quotesToRefresh = mappedQuotes;
+                quotesToRefresh = quotes.ToList();
                 await _stockData.SaveQuotes(quotesToRefresh);
             }
 

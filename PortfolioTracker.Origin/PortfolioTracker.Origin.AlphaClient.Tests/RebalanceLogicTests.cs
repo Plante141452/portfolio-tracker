@@ -7,6 +7,7 @@ using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.Common.Models.Enums;
 using PortfolioTracker.Origin.DataAccess;
+using PortfolioTracker.Origin.IEX;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 
 namespace PortfolioTracker.Origin.RebalanceLogic.Tests
@@ -25,8 +26,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             var client = new AlphaClientWrapper(clientFactory);
             var mongoWrapper = new MongoClientWrapper(new ConnectionStringProvider());
             var stockDataAccess = new StockDataAccess(mongoWrapper);
+            var iexClient = new IEXClient();
+
             _portfolioDataAccess = new PortfolioDataAccess(mongoWrapper);
-            _alphaClient = new AlphaClientLogic(client, stockDataAccess);
+            _alphaClient = new AlphaClientLogic(client, stockDataAccess, iexClient);
             _rebalanceLogic = new RebalanceLogic();
         }
 
@@ -48,7 +51,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
                     new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
                     new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "^RUT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
                     new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 17m },
                     new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m }
                 },
@@ -163,7 +167,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             }
 
             var stockPercent = (int)cat.Stocks.Sum(s => s.DesiredAmount);
-            var stockCombinations = GetPossibleStockCombinations(stockPercent, cat.Stocks.Copy(), 3, 8);
+            var stockCombinations = GetPossibleStockCombinations(stockPercent, cat.Stocks.Copy(), 3, 6);
 
             var portfolios = stockCombinations.Select((allocations, i) => new Portfolio
             {
@@ -318,9 +322,43 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
                     new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
                     new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
-                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
-                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
-                    new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                },
+                new[]
+                {
+                    //new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    //new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 13m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                },
+                new[]
+                {
+                    //new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    //new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
                 },
                 new[]
                 {
@@ -333,11 +371,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
                     //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
                     new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
-                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
-                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 0m },
-                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
-                    new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
                 },
                 new[]
                 {
@@ -349,12 +387,46 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
                     //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
                     //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
-                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
-                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 13m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 19m },
                     new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
-                    new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 0m },
-                    new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 13m },
-                    new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 5m }
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                },
+                new[]
+                {
+                    //new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    //new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 18m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
+                },
+                new[]
+                {
+                    //new { Symbol = "SOXL", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    //new { Symbol = "CIBR", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "MJ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "TAN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ICLN", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XBI", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "ARKG", Type = AllocationTypeEnum.Percentage, DesiredAmount = 3m },
+                    //new { Symbol = "XLF", Type = AllocationTypeEnum.Percentage, DesiredAmount = 6m },
+                    new { Symbol = "SPY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 14m },
+                    new { Symbol = "QQQ", Type = AllocationTypeEnum.Percentage, DesiredAmount = 16m },
+                    new { Symbol = "DIA", Type = AllocationTypeEnum.Percentage, DesiredAmount = 12m },
+                    //new { Symbol = "BND", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m },
+                    //new { Symbol = "TLT", Type = AllocationTypeEnum.Percentage, DesiredAmount = 10m },
+                    //new { Symbol = "VIXY", Type = AllocationTypeEnum.Percentage, DesiredAmount = 4m }
                 }
             }.ToList();
 
@@ -504,9 +576,10 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "Indexes",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 16m, CurrentShares = 7 },
+                    new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 8 },
                     new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 16m, CurrentShares = 10 },
-                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 10m, CurrentShares = 4 }
+                    new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 4 },
+                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 20 }
                 }
             };
 
@@ -516,8 +589,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 5 },
-                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 10m, CurrentShares = 8 },
-                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 20 }
+                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 10m, CurrentShares = 8 }
                 }
             };
 
@@ -528,7 +600,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 {
                     new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .5m, CurrentShares = 15 },
                     new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 26 },
-                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 7 },
+                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .2m, CurrentShares = 9 },
                     new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .15m, CurrentShares = 10 }
                 }
             };
@@ -537,7 +609,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             {
                 Id = "5d80d0587d2d4657d8e1fe8f",
                 Name = "Default",
-                CashOnHand = 04,
+                CashOnHand = 9.56m,
                 Categories = new List<Category>
                 {
                     lowRiskStocks,
@@ -567,52 +639,313 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
         [Test]
         public async Task UpdatePortfolio2()
         {
-            var etfs = new Category
+            var etFs = new OptimizableCategory
             {
                 Name = "Etfs",
-                Stocks = new List<StockAllocation>
+                AllocatedAmount = 25,
+                Stocks = new List<OptimizableStock>
                 {
-                    new StockAllocation { Symbol = "SOXL", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 20m, CurrentShares = 4 },
-                    new StockAllocation { Symbol = "CIBR", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 13 },
-                    //new StockAllocation { Symbol = "MJ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 14 },
-                    new StockAllocation { Symbol = "TAN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 11 },
-                    new StockAllocation { Symbol = "ICLN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 31 },
-                    new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 4 },
-                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 11 },
-                    new StockAllocation { Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 0m, CurrentShares = 23 }
+                    new OptimizableStock { Symbol = "SOXL", MinimumAllocation = 3, MaximumAllocation = 5 },
+                    new OptimizableStock { Symbol = "CIBR", MinimumAllocation = 2, MaximumAllocation = 4 },
+                    new OptimizableStock { Symbol = "MJ", MinimumAllocation = 2, MaximumAllocation = 4 },
+                    new OptimizableStock { Symbol = "TAN", MinimumAllocation = 2, MaximumAllocation = 4 },
+                    new OptimizableStock { Symbol = "ICLN", MinimumAllocation = 2, MaximumAllocation = 4 },
+                    new OptimizableStock { Symbol = "XBI", MinimumAllocation = 3, MaximumAllocation = 5 },
+                    new OptimizableStock { Symbol = "ARKG", MinimumAllocation = 2, MaximumAllocation = 4 },
+                    new OptimizableStock { Symbol = "XLF", MinimumAllocation = 3, MaximumAllocation = 5 }
                 }
             };
-            //10
-            //25
-            //65
-            //var stable = new Category
-            //{
-            //    Name = "Stable",
-            //    Stocks = new List<StockAllocation>
-            //    {
-            //        new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 15m, CurrentShares = 7 },
-            //        new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 20m, CurrentShares = 8 },
-            //        new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 10m, CurrentShares = 5 },
-            //        new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentShares = 14 },
-            //        //new StockAllocation { Symbol = "BND", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 10m, CurrentShares = 18 },
-            //        //new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentShares = 4 }
-            //    }
-            //};
 
-            Portfolio portfolio = new Portfolio
+            var indexes = new OptimizableCategory
+            {
+                Name = "Indexes",
+                AllocatedAmount = 45,
+                Stocks = new List<OptimizableStock>
+                {
+                    new OptimizableStock { Symbol = "SPY", MinimumAllocation = 10, MaximumAllocation = 20 },
+                    new OptimizableStock { Symbol = "QQQ", MinimumAllocation = 10, MaximumAllocation = 20 },
+                    new OptimizableStock { Symbol = "DIA", MinimumAllocation = 10, MaximumAllocation = 20 },
+                    new OptimizableStock { Symbol = "VIXY", MinimumAllocation = 5, MaximumAllocation = 10 }
+                }
+            };
+
+            var bonds = new OptimizableCategory
+            {
+                Name = "Bonds",
+                AllocatedAmount = 20,
+                Stocks = new List<OptimizableStock>
+                {
+                    new OptimizableStock { Symbol = "BND", MinimumAllocation = 0, MaximumAllocation = 15 },
+                    new OptimizableStock { Symbol = "TLT", MinimumAllocation = 0, MaximumAllocation = 15 }
+                }
+            };
+
+            OptimizablePortfolio portfolio = new OptimizablePortfolio
             {
                 Id = "5d83dbda7d2d4604505722e5",
                 Name = "Default",
                 CashOnHand = 1.37m,
-                Categories = new List<Category>
+                Categories = new List<OptimizableCategory>
                 {
-                    etfs,
+                    etFs,
+                    indexes,
+                    bonds
                     //stable
                 }
             };
 
-            var result = await _portfolioDataAccess.SavePortfolios(new List<Portfolio> { portfolio });
-            Console.WriteLine($"Portfolio Id: {result.First().Id}");
+            var result = await OptimizeCategoryv2(portfolio);
+
+            //Portfolio 1: 5d80d0587d2d4657d8e1fe8f
+            //Portfolio 2: 5d83dbda7d2d4604505722e5
+            var finalPortfolio = result.CreatePortfolio();
+
+            var symbols = finalPortfolio.AllStocks.Select(p => p.Symbol).ToList();
+
+            var history = await _alphaClient.GetPortfolioHistory(symbols);
+
+            var portfolioSummary = string.Join("\n", finalPortfolio.AllStocks.Select(s => $"{s.Symbol}: {s.DesiredAmount}%"));
+            Console.WriteLine(portfolioSummary);
+
+            var finalSet = new RunScenarioDataSet
+            {
+                InitialInvestment = 10000,
+                CashInfluxAmount = 150,
+                CashInfluxCadence = CadenceTypeEnum.Weekly,
+                Portfolios = new List<Portfolio> { finalPortfolio },
+                History = history
+            };
+
+            var finalResult = await _rebalanceLogic.Simulate(finalSet);
+            var simulationResult = finalResult.First();
+
+            var percents = simulationResult.Results.Select(r => Math.Round(r.PercentIncrease, 2) * 100).OrderBy(r => r).ToList();
+
+            var min = percents[0];
+            var percentile25 = percents[(int)(.25 * percents.Count)];
+            var percentile50 = percents[(int)(.50 * percents.Count)];
+            var percentile75 = percents[(int)(.75 * percents.Count)];
+            var max = percents.Last();
+
+            string percentilesString = $"{min}%, {percentile25}%, {percentile50}%, {percentile75}%, {max}%";
+
+            var firstScenario = simulationResult.Results.First();
+            var averagePercent = Math.Round(percents.Average(), 2);
+
+            //var maxPercent = Math.Round(simulationResult.Results.Max(r => r.PercentIncrease), 2);
+            //var minPercent = Math.Round(simulationResult.Results.Min(r => r.PercentIncrease), 2);
+
+            //Console.WriteLine($"Portfolio {result.IndexOf(simulationResult)} experienced growth between {minPercent * 100}% and {maxPercent * 100}% with an average of {averagePercent * 100}% from {firstScenario.StartDate.Date.ToShortDateString()} to {firstScenario.EndDate.Date.ToShortDateString()}");
+            Console.WriteLine($"Optimal portfolio experienced an average growth of {averagePercent}% from {firstScenario.StartDate.Date.ToShortDateString()} to {firstScenario.EndDate.Date.ToShortDateString()} with the following percentiles: {percentilesString}.");
+        }
+
+        public async Task<T> OptimizeCategoryv2<T>(T cat) where T : OptimizableCategory
+        {
+            var categorySymbols = cat.AllSymbols;
+            var getCategoryPeriods = _alphaClient.GetPortfolioHistory(categorySymbols);
+
+            var getCategories = Task.Run(async () =>
+            {
+                if (cat.Categories == null || !cat.Categories.Any())
+                    return cat.Categories;
+
+                var categories = new List<OptimizableCategory>();
+                var optimizeCategories = cat.Categories.Select(OptimizeCategoryv2);
+
+                foreach (var optimizeCategory in optimizeCategories)
+                {
+                    var optimized = await optimizeCategory;
+                    if(optimized != null)
+                        categories.Add(optimized.Copy());
+                }
+
+                return categories;
+            });
+
+            var optimizedCategories = await getCategories;
+
+            if (cat.Stocks == null || !cat.Stocks.Any())
+            {
+                cat.Categories = optimizedCategories;
+                return cat;
+            }
+
+            var stockCombinations = GetPossibleStockCombinationsv2(cat.AllocatedAmount, cat.Stocks);
+
+            var portfolios = stockCombinations.Select((allocations, i) => new Portfolio
+            {
+                Id = i.ToString(),
+                Name = i.ToString(),
+                CashOnHand = 0,
+                Stocks = allocations?.Where(a => a.AllocatedAmount > 0).Select(a => a.Create()).ToList(),
+                Categories = optimizedCategories?.Select(c => c.Create()).ToList()
+            }).ToList();
+
+            RunScenarioDataSet dataSet = new RunScenarioDataSet
+            {
+                InitialInvestment = 10000,
+                CashInfluxAmount = 150,
+                CashInfluxCadence = CadenceTypeEnum.Weekly,
+                Portfolios = portfolios,
+                History = await getCategoryPeriods
+            };
+
+            var result = await _rebalanceLogic.Simulate(dataSet);
+
+            var winner = result.Aggregate((r1, r2) => r1.Results.Average(r => r.PercentIncrease) > r2.Results.Average(r => r.PercentIncrease) ? r1 : r2);
+
+            cat.Categories = optimizedCategories;
+            cat.Stocks = winner.Portfolio.Stocks.Select(s => new OptimizableStock { Symbol = s.Symbol, AllocatedAmount = (int)s.DesiredAmount }).ToList();
+
+            return cat;
+        }
+
+        public List<List<OptimizableStock>> GetPossibleStockCombinationsv2(int allotedPercent, List<OptimizableStock> stocks)
+        {
+            var results = new List<List<OptimizableStock>>();
+
+            if (stocks.Count == 1)
+            {
+                var returnStocks = stocks.Select(s => s.Copy()).ToList();
+                var onlyStock = returnStocks.Single();
+                onlyStock.AllocatedAmount = allotedPercent;
+                results.Add(returnStocks);
+                return results;
+            }
+
+            var targetedStock = stocks.First();
+            var remainingStocks = stocks.Skip(1).ToList();
+
+            for (int i = targetedStock.MinimumAllocation; i < targetedStock.MaximumAllocation; i++)
+            {
+                if (remainingStocks.Count > 1)
+                {
+                    var innerPortfolios = GetPossibleStockCombinationsv2(allotedPercent - i, remainingStocks);
+                    if (i != 0)
+                    {
+                        foreach (var innerPortfolio in innerPortfolios)
+                        {
+                            var thisAllocation = targetedStock.Copy();
+                            thisAllocation.AllocatedAmount = i;
+
+                            innerPortfolio.Add(thisAllocation);
+                        }
+                    }
+
+                    results.AddRange(innerPortfolios);
+                }
+                else
+                {
+                    var thatOptimizableStock = remainingStocks.Single();
+
+                    var thatAmount = allotedPercent - i;
+                    if (thatAmount < thatOptimizableStock.MinimumAllocation || thatAmount > thatOptimizableStock.MaximumAllocation)
+                        continue;
+
+                    var thisAllocation = targetedStock.Copy();
+                    thisAllocation.AllocatedAmount = i;
+
+                    var thatAllocation = thatOptimizableStock.Copy();
+                    thatAllocation.AllocatedAmount = allotedPercent - i;
+
+                    var theTwo = new List<OptimizableStock>();
+
+                    if (thisAllocation.AllocatedAmount != 0)
+                        theTwo.Add(thisAllocation);
+                    if (thatAllocation.AllocatedAmount != 0)
+                        theTwo.Add(thatAllocation);
+
+                    results.Add(new List<OptimizableStock> { thatAllocation, thisAllocation });
+                }
+            }
+
+            //Distinct...
+            return results; //.Where((allocations, i) => i == results.FindIndex(r => r.Count == allocations.Count && r.All(a1 => allocations.FirstOrDefault(a2 => a2.Symbol == a1.Symbol)?.DesiredAmount == a1.DesiredAmount))).ToList();
+        }
+    }
+
+    public class OptimizablePortfolio : OptimizableCategory
+    {
+        public string Id { get; set; }
+        public decimal CashOnHand { get; set; }
+
+        public Portfolio CreatePortfolio()
+        {
+            return new Portfolio
+            {
+                Id = Id,
+                CashOnHand = CashOnHand,
+                Name = Name,
+                Categories = Categories?.Select(c => c.Create()).ToList(),
+                Stocks = Stocks?.Select(c => c.Create()).ToList()
+            };
+        }
+
+        public override Category Create()
+        {
+            return CreatePortfolio();
+        }
+    }
+
+    public class OptimizableCategory
+    {
+        public string Name { get; set; }
+        public List<OptimizableCategory> Categories { get; set; }
+        public List<OptimizableStock> Stocks { get; set; }
+        public int AllocatedAmount { get; set; }
+
+        public List<string> AllSymbols
+        {
+            get
+            {
+                var stockSymbols = Stocks?.Select(s => s.Symbol) ?? new List<string>();
+                return Categories != null ? stockSymbols.Union(Categories.SelectMany(c => c.AllSymbols)).Distinct().ToList() : stockSymbols.ToList();
+            }
+        }
+
+        public OptimizableCategory Copy() => new OptimizableCategory
+        {
+            Name = Name,
+            Categories = Categories?.Select(c => c.Copy()).ToList(),
+            Stocks = Stocks?.Select(s => s.Copy()).ToList(),
+            AllocatedAmount = AllocatedAmount
+        };
+
+        public virtual Category Create()
+        {
+            return new Category
+            {
+                Name = Name,
+                Categories = Categories?.Select(c => c.Create()).ToList(),
+                Stocks = Stocks?.Select(c => c.Create()).ToList()
+            };
+        }
+    }
+
+    public class OptimizableStock
+    {
+        public string Symbol { get; set; }
+        public int MinimumAllocation { get; set; }
+        public int MaximumAllocation { get; set; }
+        public int AllocatedAmount { get; set; }
+
+        public OptimizableStock Copy() => new OptimizableStock
+        {
+            Symbol = Symbol,
+            MinimumAllocation = MinimumAllocation,
+            MaximumAllocation = MaximumAllocation,
+            AllocatedAmount = AllocatedAmount
+        };
+
+        public StockAllocation Create()
+        {
+            return new StockAllocation
+            {
+                Symbol = Symbol,
+                CurrentShares = 0,
+                DesiredAmountType = AllocationTypeEnum.Percentage,
+                DesiredAmount = AllocatedAmount
+            };
         }
     }
 }

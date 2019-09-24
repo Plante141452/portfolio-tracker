@@ -35,7 +35,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             var tasks = new List<Task>();
 
             int stockCount = (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
-            int iterationCount = 16000000 / (dataSet.Portfolios.Count * dataSet.History.Count);
+            //int iterationCount = 16000000 / (dataSet.Portfolios.Count * dataSet.History.Count);
+            int iterationCount = 3000000 / (int)(Math.Pow(dataSet.Portfolios.Count, .25) * (int)Math.Pow(dataSet.History.Count, 1.25) * (int)Math.Pow(stockCount, 1));
             //int iterationCount = 4000 / (dataSet.Portfolios.Count * dataSet.History.Count);
 
             var start = DateTime.Now;
@@ -104,8 +105,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                     {
                         Symbol = s.Symbol,
                         Price = s.PeriodData.AdjustedClose,
-                        QuoteDate = period.ClosingDate,
-                        Volume = s.PeriodData.Volume
+                        QuoteDate = period.ClosingDate
                     }).ToList();
 
                     portfolio.CashOnHand = cashOnHand;

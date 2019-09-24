@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj" />
     <ProjectReference Include="..\PortfolioTracker.Origin.DataAccess\PortfolioTracker.Origin.DataAccess.csproj" />
+    <ProjectReference Include="..\PortfolioTracker.Origin.IEX\PortfolioTracker.Origin.IEX.csproj" />
   </ItemGroup>
 
 </Project>

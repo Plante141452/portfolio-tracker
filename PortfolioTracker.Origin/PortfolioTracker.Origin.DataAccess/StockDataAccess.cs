@@ -34,8 +34,7 @@ namespace PortfolioTracker.Origin.DataAccess
                 Symbol = q.Symbol,
                 Price = q.Price,
                 QuoteDate = q.QuoteDate,
-                UpdatedDate = q.UpdatedDate,
-                Volume = q.Volume
+                UpdatedDate = q.UpdatedDate
             }).ToList();
         }
 
@@ -60,8 +59,7 @@ namespace PortfolioTracker.Origin.DataAccess
                     Price = q.Price,
                     Symbol = q.Symbol,
                     QuoteDate = q.QuoteDate,
-                    UpdatedDate = q.UpdatedDate,
-                    Volume = q.Volume
+                    UpdatedDate = q.UpdatedDate
                 }).ToList();
                 await collection.InsertManyAsync(docs);
             }
@@ -77,8 +75,7 @@ namespace PortfolioTracker.Origin.DataAccess
                         Price = u.QuoteData.Price,
                         Symbol = u.QuoteData.Symbol,
                         QuoteDate = u.QuoteData.QuoteDate,
-                        UpdatedDate = u.QuoteData.UpdatedDate,
-                        Volume = u.QuoteData.Volume
+                        UpdatedDate = u.QuoteData.UpdatedDate
                     });
                 })));
             }

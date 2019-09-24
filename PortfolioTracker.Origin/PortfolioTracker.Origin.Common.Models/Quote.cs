@@ -8,6 +8,5 @@ namespace PortfolioTracker.Origin.Common.Models
         public decimal Price { get; set; }
         public DateTimeOffset QuoteDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
-        public long Volume { get; set; }
     }
 }

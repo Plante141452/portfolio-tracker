@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess;
+using PortfolioTracker.Origin.IEX;
 
 namespace PortfolioTracker.Origin.Api.Controllers
 {
@@ -16,7 +17,8 @@ namespace PortfolioTracker.Origin.Api.Controllers
         public StocksController()
         {
             var clientFactory = new AlphaVantageStocksClientFactory(new ApiKeyProvider());
-            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider())));
+            var iexClient = new IEXClient();
+            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider())), iexClient);
         }
 
         // GET api/values/5
