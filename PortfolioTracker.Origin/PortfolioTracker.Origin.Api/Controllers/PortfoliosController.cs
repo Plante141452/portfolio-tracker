@@ -23,10 +23,10 @@ namespace PortfolioTracker.Origin.Api.Controllers
         {
             var mongoWrapper = new MongoClientWrapper(new ConnectionStringProvider());
             var clientFactory = new AlphaVantageStocksClientFactory(new ApiKeyProvider());
-            var iexClient = new IEXClient();
+            //var iexClient = new IEXClient();
 
             _portfolioDataAccess = new PortfolioDataAccess(mongoWrapper);
-            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(mongoWrapper), iexClient);
+            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(mongoWrapper));
             _rebalanceLogic = new RebalanceLogic.RebalanceLogic();
         }
 

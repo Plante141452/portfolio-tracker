@@ -36,7 +36,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             int stockCount = (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
             //int iterationCount = 16000000 / (dataSet.Portfolios.Count * dataSet.History.Count);
-            int iterationCount = 3000000 / (int)(Math.Pow(dataSet.Portfolios.Count, .25) * (int)Math.Pow(dataSet.History.Count, 1.25) * (int)Math.Pow(stockCount, 1));
+            int iterationCount = 200000 / (int)(Math.Pow(dataSet.Portfolios.Count, .9) * (int)Math.Pow(dataSet.History.Count, .5) * (int)Math.Pow(stockCount, .9));
+            //int iterationCount = 500000 / (int)(Math.Pow(dataSet.Portfolios.Count, .9) * (int)Math.Pow(dataSet.History.Count, .5) * (int)Math.Pow(stockCount, .9));
             //int iterationCount = 4000 / (dataSet.Portfolios.Count * dataSet.History.Count);
 
             var start = DateTime.Now;

@@ -3,22 +3,22 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
+using PortfolioTracker.Origin.IEX;
 
 namespace PortfolioTracker.Origin.AlphaClient
 {
-    public class AlphaClientLogic : IAlphaClientLogic
+    public class IexClientLogic : IAlphaClientLogic
     {
-        private readonly IAlphaClientWrapper _alphaClient;
+        private readonly IIEXClient _iexClient;
         private readonly IStockDataAccess _stockData;
 
-        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IStockDataAccess stockData)
+        public IexClientLogic(IStockDataAccess stockData, IIEXClient iexClient)
         {
-            _alphaClient = alphaClient;
             _stockData = stockData;
+            _iexClient = iexClient;
         }
 
         public async Task<List<StockHistory>> GetHistory(List<string> symbols)
@@ -33,8 +33,9 @@ namespace PortfolioTracker.Origin.AlphaClient
                     histories.Enqueue(existingData);
                 else
                 {
-                    var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
-                    var history = TransformSeries(data);
+                    var data = await _iexClient.GetHistory(s, TimeCadenceEnum.Weekly);
+                    // var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
+                    var history = TransformSeries(s, data);
 
                     if (existingData != null)
                         history = MergeHistories(history, existingData);
@@ -67,22 +68,17 @@ namespace PortfolioTracker.Origin.AlphaClient
             return updatedData;
         }
 
-        private StockHistory TransformSeries(StockTimeSeries series)
+        private StockHistory TransformSeries(string symbol, List<IEXHistoryContract> series)
         {
-            List<StockDataPoint> history = series.DataPoints.ToList();
-
-            if (DateTimeOffset.UtcNow.Subtract(history.First().Time).TotalDays < 1)
-                history = history.Skip(1).ToList();
-
             return new StockHistory
             {
-                Symbol = series.Symbol,
-                History = history.Select((dp, i) => new StockHistoryItem
+                Symbol = symbol,
+                History = series.Select((dp, i) => new StockHistoryItem
                 {
-                    ClosingDate = dp.Time,
-                    Volume = dp.Volume,
-                    AdjustedClose = dp.ClosingPrice,
-                    AdjustedPercentChanged = i == 0 ? 0 : dp.ClosingPrice / history[i - 1].ClosingPrice
+                    ClosingDate = dp.date,
+                    Volume = dp.volume,
+                    AdjustedClose = dp.close,
+                    AdjustedPercentChanged = i == 0 ? 0 : dp.close / series[i - 1].close
                 }).ToList()
             };
         }
@@ -127,15 +123,20 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             if (symbolsToRetrieve.Any())
             {
-                var quotes = await _alphaClient.Execute(x => x.RequestBatchQuotesAsync(symbolsToRetrieve.ToArray()));
-                quotesToRefresh = quotes.Select(q => new Quote
+                ConcurrentQueue<Quote> quotes = new ConcurrentQueue<Quote>();
+                await Task.WhenAll(symbolsToRetrieve.Select(symbol => Task.Run(async () =>
                 {
-                    Symbol = q.Symbol,
-                    Price = q.Price,
-                    QuoteDate = q.Time,
-                    UpdatedDate = DateTimeOffset.UtcNow
-                }).ToList();
+                    var quote = await _iexClient.GetQuote(symbol);
+                    quotes.Enqueue(new Quote
+                    {
+                        Symbol = quote.symbol,
+                        Price = quote.latestPrice,
+                        QuoteDate = quote.latestUpdate,
+                        UpdatedDate = DateTimeOffset.UtcNow
+                    });
+                })));
 
+                quotesToRefresh = quotes.ToList();
                 await _stockData.SaveQuotes(quotesToRefresh);
             }
 

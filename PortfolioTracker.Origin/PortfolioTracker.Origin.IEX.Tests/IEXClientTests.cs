@@ -18,5 +18,12 @@ namespace PortfolioTracker.Origin.IEX.Tests
             var test = await _client.GetQuote("MSFT");
             Assert.IsNotNull(test);
         }
+
+        [Test]
+        public async Task TestHistory()
+        {
+            var test = await _client.GetHistory("MSFT", TimeCadenceEnum.Quarterly);
+            Assert.IsNotNull(test);
+        }
     }
 }
