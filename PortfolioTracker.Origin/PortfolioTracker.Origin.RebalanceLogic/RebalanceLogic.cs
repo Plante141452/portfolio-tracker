@@ -21,22 +21,18 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             ConcurrentDictionary<string, ConcurrentQueue<ScenarioResult>> mapping = new ConcurrentDictionary<string, ConcurrentQueue<ScenarioResult>>();
 
-            var results = await RunScenario(dataSet);
-
-            foreach (var scenarioResult in results)
+            foreach (var portfolio in dataSet.Portfolios)
             {
-                var index = results.IndexOf(scenarioResult);
-                var portfolio = dataSet.Portfolios[index].Copy();
-
                 mapping[portfolio.Id] = new ConcurrentQueue<ScenarioResult>();
-                mapping[portfolio.Id].Enqueue(scenarioResult);
             }
+
+            var realScenario = RunScenario(dataSet);
 
             var tasks = new List<Task>();
 
             int stockCount = (int)dataSet.Portfolios.Average(p => p.AllStocks.Count);
             //int iterationCount = 16000000 / (dataSet.Portfolios.Count * dataSet.History.Count);
-            int iterationCount = 200000 / (int)(Math.Pow(dataSet.Portfolios.Count, .9) * (int)Math.Pow(dataSet.History.Count, .5) * (int)Math.Pow(stockCount, .9));
+            int iterationCount = 5000000 / (int)(Math.Pow(dataSet.Portfolios.Count * 2, 1.1) * (int)Math.Pow(dataSet.History.Count, .5) * (int)Math.Pow(stockCount, .9));
             //int iterationCount = 500000 / (int)(Math.Pow(dataSet.Portfolios.Count, .9) * (int)Math.Pow(dataSet.History.Count, .5) * (int)Math.Pow(stockCount, .9));
             //int iterationCount = 4000 / (dataSet.Portfolios.Count * dataSet.History.Count);
 
@@ -68,6 +64,16 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             }
 
             await Task.WhenAll(tasks);
+
+            var results = await realScenario;
+
+            foreach (var scenarioResult in results)
+            {
+                var index = results.IndexOf(scenarioResult);
+                var portfolio = dataSet.Portfolios[index].Copy();
+
+                mapping[portfolio.Id].Enqueue(scenarioResult);
+            }
 
             var duration = DateTime.Now.Subtract(start).TotalSeconds;
             Console.WriteLine($"{dataSet.Portfolios.Count} portfolios, {dataSet.History.Count} weeks, {stockCount} stocks took {duration}s");
@@ -158,7 +164,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             return results.ToList();
         }
 
-        public RebalanceResult Rebalance(RebalanceDataSet dataSet)
+        public RebalanceResult Rebalance(RebalanceDataSet dataSet, bool quickRebalance = true)
         {
             var stocks = dataSet.Portfolio.AllStocks.Select(a => new RebalanceItem
             {
@@ -248,15 +254,30 @@ namespace PortfolioTracker.Origin.RebalanceLogic
             {
                 var amountRemaining = portfolioValue - usedUpAmount;
 
-                var mostExpensiveFactor = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault();
-                if (mostExpensiveFactor == null)
+                var availableFactors = factors.Where(f => f.Price < amountRemaining).ToList();
+
+                if (!availableFactors.Any())
                     break;
 
-                var adjustedFactor = ((mostExpensiveFactor.EndAmount + 1) * mostExpensiveFactor.Price) / portfolioValue;
+                var factorToUse = quickRebalance
+                    ? availableFactors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
+                    : availableFactors.Aggregate((f1, f2) =>
+                    {
+                        var f1Adjusted = ((f1.EndAmount + 1) * f1.Price) / portfolioValue;
+                        var f2Adjusted = ((f2.EndAmount + 1) * f2.Price) / portfolioValue;
+                        var f1Dif = Math.Abs(f1.DesiredFactor - f1Adjusted);
+                        var f2Dif = Math.Abs(f2.DesiredFactor - f2Adjusted);
+                        return f1Dif < f2Dif ? f1 : f2;
+                    });
 
-                mostExpensiveFactor.EndAmount += 1;
-                mostExpensiveFactor.CurrentFactor = adjustedFactor;
-                usedUpAmount += mostExpensiveFactor.Price;
+                if (factorToUse == null)
+                    break;
+
+                var adjustedFactor = ((factorToUse.EndAmount + 1) * factorToUse.Price) / portfolioValue;
+
+                factorToUse.EndAmount += 1;
+                factorToUse.CurrentFactor = adjustedFactor;
+                usedUpAmount += factorToUse.Price;
 
                 //var factorsInPlay = factors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).ToList();
                 //if (!factorsInPlay.Any())

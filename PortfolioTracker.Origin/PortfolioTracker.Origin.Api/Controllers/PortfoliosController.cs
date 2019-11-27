@@ -65,7 +65,7 @@ namespace PortfolioTracker.Origin.Api.Controllers
                     Quotes = quotes
                 };
 
-                return _rebalanceLogic.Rebalance(dataSet);
+                return _rebalanceLogic.Rebalance(dataSet, false);
             }
         }
     }

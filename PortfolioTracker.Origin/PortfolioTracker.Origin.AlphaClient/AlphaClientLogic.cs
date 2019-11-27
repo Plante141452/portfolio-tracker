@@ -28,12 +28,14 @@ namespace PortfolioTracker.Origin.AlphaClient
             await Task.WhenAll(symbols.Select(s => Task.Run(async () =>
             {
                 var existingData = await _stockData.GetHistory(s);
+
                 var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
                 if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
                     histories.Enqueue(existingData);
                 else
                 {
                     var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
+                    
                     var history = TransformSeries(data);
 
                     if (existingData != null)
@@ -60,7 +62,7 @@ namespace PortfolioTracker.Origin.AlphaClient
             StockHistoryItem lastClosing = updatedData.History.First();
             foreach (var history in updatedData.History.Skip(1))
             {
-                history.AdjustedClose = lastClosing.AdjustedClose * lastClosing.AdjustedPercentChanged;
+                history.AdjustedClose = lastClosing.AdjustedPercentChanged > 0 ? lastClosing.AdjustedClose / lastClosing.AdjustedPercentChanged : lastClosing.AdjustedClose;
                 lastClosing = history;
             }
 
@@ -82,7 +84,7 @@ namespace PortfolioTracker.Origin.AlphaClient
                     ClosingDate = dp.Time,
                     Volume = dp.Volume,
                     AdjustedClose = dp.ClosingPrice,
-                    AdjustedPercentChanged = i == 0 ? 0 : dp.ClosingPrice / history[i - 1].ClosingPrice
+                    AdjustedPercentChanged = i == history.Count - 1 ? 0 : dp.ClosingPrice / history[i + 1].ClosingPrice
                 }).ToList()
             };
         }

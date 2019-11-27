@@ -46,14 +46,14 @@ namespace PortfolioTracker.Origin.RebalanceLogic
 
             shuffled = shuffled.OrderByDescending(p => p.ClosingDate).ToList();
 
-            PortfolioHistoryPeriod lastPeriod = shuffled.OrderByDescending(s => s.ClosingDate).First();
+            PortfolioHistoryPeriod lastPeriod = shuffled.First();
             foreach (var period in shuffled.Skip(1))
             {
                 foreach (var stock in period.Stocks)
                 {
                     var lastStockPeriodData = lastPeriod.Stocks.First(s => s.Symbol == stock.Symbol).PeriodData;
                     if (lastStockPeriodData.AdjustedPercentChanged > .0001m)
-                        stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose * lastStockPeriodData.AdjustedPercentChanged;
+                        stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose / lastStockPeriodData.AdjustedPercentChanged;
                     else
                         stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose;
                 }

@@ -8,6 +8,6 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Interfaces
     {
         Task<List<SimulationResult>> Simulate(RunScenarioDataSet dataSet);
         Task<List<ScenarioResult>> RunScenario(RunScenarioDataSet dataSet);
-        RebalanceResult Rebalance(RebalanceDataSet dataSet);
+        RebalanceResult Rebalance(RebalanceDataSet dataSet, bool quickRebalance = true);
     }
 }

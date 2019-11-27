@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using AlphaVantage.Net.Stocks;
@@ -44,7 +45,17 @@ namespace PortfolioTracker.Origin.AlphaClient
                 }
 
                 var client = _clientFactory.GetClient();
-                return func(client);
+
+                try
+                {
+                    return func(client);
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+
+                return default(T);
             });
         }
     }

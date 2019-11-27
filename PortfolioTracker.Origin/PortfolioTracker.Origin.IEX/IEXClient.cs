@@ -96,7 +96,7 @@ namespace PortfolioTracker.Origin.IEX
         {
             var friday = ToClosestFriday(DateTimeOffset.Now.Date);
 
-            var history = await Get<List<IEXHistoryContract>>($"stock/{symbol}/chart/5y");
+            var history = await Get<List<IEXHistoryContract>>($"stock/{symbol}/chart/5y?chartCloseOnly=true");
 
             var index = history.FindLastIndex(x => x.date.Date <= friday);
             var fridays = new List<IEXHistoryContract>();
