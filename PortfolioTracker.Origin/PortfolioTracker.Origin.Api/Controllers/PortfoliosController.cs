@@ -5,7 +5,6 @@ using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
-using PortfolioTracker.Origin.IEX;
 using PortfolioTracker.Origin.RebalanceLogic.Interfaces;
 using PortfolioTracker.Origin.RebalanceLogic.Models;
 

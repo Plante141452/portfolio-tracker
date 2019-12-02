@@ -487,7 +487,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "DIS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 2 }, //1.75
-                    new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1.75m, CurrentShares = 1 }, //1.75
+                    new StockAllocation { Symbol = "MSFT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2m, CurrentShares = 2 }, //1.75
                     new StockAllocation { Symbol = "V", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1.75m, CurrentShares = 1 } //1.75
                 }
             };
@@ -496,9 +496,9 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "Medium Risk Stocks",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .75m, CurrentShares = 1 }, //1
-                    new StockAllocation { Symbol = "PTON", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .75m, CurrentShares = 4 }, //1
-                    new StockAllocation { Symbol = "QCOM", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .9m, CurrentShares = 1 } //1
+                    new StockAllocation { Symbol = "SQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 2 }, //1
+                    new StockAllocation { Symbol = "PTON", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .5m, CurrentShares = 2 }, //1
+                    new StockAllocation { Symbol = "QCOM", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 1m, CurrentShares = 2 } //1
                 }
             };
 
@@ -508,8 +508,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Stocks = new List<StockAllocation>
                 {
                     new StockAllocation { Symbol = "SOXL", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 5m, CurrentShares = 3 }, //5
-                    new StockAllocation { Symbol = "CIBR", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2.8m, CurrentShares = 14 }, //3
-                    new StockAllocation { Symbol = "LIT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2.7m, CurrentShares = 16 } //2.5
+                    new StockAllocation { Symbol = "CIBR", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3m, CurrentShares = 14 }, //3
+                    new StockAllocation { Symbol = "LIT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2.9m, CurrentShares = 16 } //2.5
                 }
             };
 
@@ -518,7 +518,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "Cannabis",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "MJ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2.85m, CurrentShares = 25 } //3
+                    new StockAllocation { Symbol = "MJ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 2.95m, CurrentShares = 25 } //3
                 }
             };
 
@@ -527,8 +527,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "Energy",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "TAN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 21 }, //4
-                    new StockAllocation { Symbol = "ICLN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4.1m, CurrentShares = 58 } //4
+                    new StockAllocation { Symbol = "TAN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 20 }, //4
+                    new StockAllocation { Symbol = "ICLN", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4.1m, CurrentShares = 53 } //4
                 }
             };
 
@@ -537,8 +537,8 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "BioTech",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.75m, CurrentShares = 5 }, //4
-                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.75m, CurrentShares = 17 } //4
+                    new StockAllocation { Symbol = "XBI", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.2m, CurrentShares = 5 }, //4
+                    new StockAllocation { Symbol = "ARKG", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.2m, CurrentShares = 13 } //4
                 }
             };
 
@@ -549,7 +549,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 {
                     new StockAllocation
                     {
-                        Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.9m, CurrentShares = 18 //4
+                        Symbol = "XLF", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 19 //4
                     }
                 }
             };
@@ -562,7 +562,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                     new StockAllocation { Symbol = "SPY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 6 }, //14
                     new StockAllocation { Symbol = "QQQ", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 9 }, //14
                     new StockAllocation { Symbol = "DIA", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 12m, CurrentShares = 5 }, //12
-                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 4m, CurrentShares = 43 } //3
+                    new StockAllocation { Symbol = "VIXY", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 3.95m, CurrentShares = 40 } //3
                 }
             };
 
@@ -571,7 +571,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "Bonds",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14m, CurrentShares = 13 } //14
+                    new StockAllocation { Symbol = "TLT", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = 14.2m, CurrentShares = 14 } //14
                 }
             };
 
@@ -580,11 +580,11 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
                 Name = "High Risk Stocks",
                 Stocks = new List<StockAllocation>
                 {
-                    new StockAllocation { Symbol = "I", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .25m, CurrentShares = 12 }, //.25
-                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .25m, CurrentShares = 20 }, //.25
-                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .25m, CurrentShares = 386 }, //.25
-                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .25m, CurrentShares = 30 }, //.25
-                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .25m, CurrentShares = 40 }  //.25
+                    new StockAllocation { Symbol = "I", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .21m, CurrentShares = 10 }, //.25
+                    new StockAllocation { Symbol = "SLRX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .26m, CurrentShares = 14 }, //.25
+                    new StockAllocation { Symbol = "TRXC", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .26m, CurrentShares = 413 }, //.25
+                    new StockAllocation { Symbol = "EROS", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .26m, CurrentShares = 23 }, //.25
+                    new StockAllocation { Symbol = "TRNX", DesiredAmountType = AllocationTypeEnum.Percentage, DesiredAmount = .26m, CurrentShares = 46 }  //.25
                 }
             };
 
@@ -592,7 +592,7 @@ namespace PortfolioTracker.Origin.RebalanceLogic.Tests
             {
                 Id = "5d80d0587d2d4657d8e1fe8f",
                 Name = "Default",
-                CashOnHand = 100.07m,
+                CashOnHand = .18m,
                 Categories = new List<Category>
                 {
                     lowRiskStocks,
