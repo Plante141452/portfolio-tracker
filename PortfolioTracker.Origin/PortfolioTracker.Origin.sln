@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.DataAccess", "PortfolioTracker.Origin.DataAccess\PortfolioTracker.Origin.DataAccess.csproj", "{2CD78185-676F-4D92-AB62-065A0B17ADCF}"
 EndProject
@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.Reb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.Common.Logic", "PortfolioTracker.Origin.Common.Logic\PortfolioTracker.Origin.Common.Logic.csproj", "{5396744D-0D96-460A-8F11-2E37FB02D873}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.Origin.IEX", "PortfolioTracker.Origin.IEX\PortfolioTracker.Origin.IEX.csproj", "{5D2AC4CB-E410-4CCB-BA0E-691500444A44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Origin.IEX", "PortfolioTracker.Origin.IEX\PortfolioTracker.Origin.IEX.csproj", "{5D2AC4CB-E410-4CCB-BA0E-691500444A44}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.Origin.IEX.Tests", "PortfolioTracker.Origin.IEX.Tests\PortfolioTracker.Origin.IEX.Tests.csproj", "{E06C9A2E-F7B0-4B0E-A5E9-73E23E3B4F49}"
 EndProject
