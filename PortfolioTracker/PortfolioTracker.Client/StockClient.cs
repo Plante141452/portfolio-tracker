@@ -13,7 +13,7 @@ namespace PortfolioTracker.Client
 
         public StockClient()
         {
-            _stockClient = new RestClient("https://portfolio-tracker-api-dev.azurewebsites.net");
+            _stockClient = new RestClient("https://portfolio-tracker-api-dev.azurewebsites.net/api");
         }
 
         public async Task<ReturnObject<StockHistory>> GetHistory(string symbol)
@@ -21,7 +21,7 @@ namespace PortfolioTracker.Client
             var response = await _stockClient.ExecuteGetTaskAsync<ReturnObject<StockHistory>>(new RestRequest
             {
                 Method = Method.GET,
-                Resource = $"stocks/{symbol}"
+                Resource = $"stocks/{symbol}/history"
             });
 
             if (response.StatusCode == HttpStatusCode.OK)

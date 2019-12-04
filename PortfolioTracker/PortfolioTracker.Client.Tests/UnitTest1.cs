@@ -10,21 +10,22 @@ namespace PortfolioTracker.Client.Tests
 {
     public class Tests
     {
-
-        private IQueueClient _queueClient;
+        private IQueueClient _historyClient;
+        private IQueueClient _updatedClient;
 
         [SetUp]
         public void Setup()
         {
-            _queueClient = new QueueClient("Endpoint=sb://portfolio-tracker-dev.servicebus.windows.net/;SharedAccessKeyName=test-access;SharedAccessKey=H03gkTuC9YCItb9wyvpbMpLo7di5EDxWYWa//06gbo0=", "history");
+            _historyClient = new QueueClient("Endpoint=sb://portfolio-tracker-dev.servicebus.windows.net/;SharedAccessKeyName=test-access;SharedAccessKey=H03gkTuC9YCItb9wyvpbMpLo7di5EDxWYWa//06gbo0=", "updatehistory");
+            _updatedClient = new QueueClient("Endpoint=sb://portfolio-tracker-dev.servicebus.windows.net/;SharedAccessKeyName=test-access;SharedAccessKey=H03gkTuC9YCItb9wyvpbMpLo7di5EDxWYWa//06gbo0=", "historyupdated");
         }
 
         [Test]
         public async Task Test()
         {
             // Send messages.
-            await SendMessagesAsync("MSFT");
-            await _queueClient.CloseAsync();
+            await SendMessagesAsync("SPY");
+            await _historyClient.CloseAsync();
         }
 
         [Test]
@@ -32,7 +33,7 @@ namespace PortfolioTracker.Client.Tests
         {
             // Send messages.
             RegisterOnMessageHandlerAndReceiveMessages();
-            await _queueClient.CloseAsync();
+            await _updatedClient.CloseAsync();
         }
         private void RegisterOnMessageHandlerAndReceiveMessages()
         {
@@ -49,7 +50,7 @@ namespace PortfolioTracker.Client.Tests
             };
 
             // Register the function that processes messages.
-            _queueClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
+            _updatedClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
 
             Thread.Sleep(10000);
         }
@@ -65,10 +66,11 @@ namespace PortfolioTracker.Client.Tests
         {
             // Process the message.
             var messageContent = Encoding.UTF8.GetString(message.Body);
+            var item = JsonConvert.DeserializeObject<HistoryQueueItem>(messageContent);
 
             // Complete the message so that it is not received again.
             // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
-            await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
+            await _updatedClient.CompleteAsync(message.SystemProperties.LockToken);
             // Note: Use the cancellationToken passed as necessary to determine if the queueClient has already been closed.
             // If queueClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
             // to avoid unnecessary exceptions.
@@ -86,7 +88,7 @@ namespace PortfolioTracker.Client.Tests
             var message = new Message(Encoding.UTF8.GetBytes(messageBody));
             message.Label = "queueItem";
             // Send the message to the queue.
-            await _queueClient.SendAsync(message);
+            await _historyClient.SendAsync(message);
         }
     }
 }

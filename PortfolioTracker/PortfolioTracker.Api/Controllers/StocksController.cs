@@ -23,6 +23,7 @@ namespace PortfolioTracker.Api.Controllers
 
         // GET api/values/5
         [HttpGet]
+        [Route("{symbol}/History")]
         public ActionResult<ReturnObject<StockHistory>> Get(string symbol)
         {
             {
