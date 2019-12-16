@@ -16,7 +16,7 @@ namespace PortfolioTracker.Client.Tests
         [SetUp]
         public void Setup()
         {
-            _queueClient = new QueueClient("Endpoint=sb://portfolio-tracker-dev.servicebus.windows.net/;SharedAccessKeyName=test-access;SharedAccessKey=H03gkTuC9YCItb9wyvpbMpLo7di5EDxWYWa//06gbo0=", "history");
+            _queueClient = new QueueClient("Endpoint=sb://portfolio-tracker-dev.servicebus.windows.net/;SharedAccessKeyName=test-access;SharedAccessKey=H03gkTuC9YCItb9wyvpbMpLo7di5EDxWYWa//06gbo0=", "updatehistory");
         }
 
         [Test]
@@ -24,6 +24,12 @@ namespace PortfolioTracker.Client.Tests
         {
             // Send messages.
             await SendMessagesAsync("MSFT");
+            await SendMessagesAsync("SPY");
+            await SendMessagesAsync("QQQ");
+            await SendMessagesAsync("TRNX");
+            await SendMessagesAsync("TRXC");
+            await SendMessagesAsync("SQ");
+            await SendMessagesAsync("PTON");
             await _queueClient.CloseAsync();
         }
 
@@ -84,7 +90,9 @@ namespace PortfolioTracker.Client.Tests
             // Create a new message to send to the queue.
             string messageBody = JsonConvert.SerializeObject(queueItem);
             var message = new Message(Encoding.UTF8.GetBytes(messageBody));
+        
             message.Label = "queueItem";
+            
             // Send the message to the queue.
             await _queueClient.SendAsync(message);
         }

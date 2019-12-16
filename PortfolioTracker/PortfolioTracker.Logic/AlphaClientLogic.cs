@@ -25,11 +25,11 @@ namespace PortfolioTracker.AlphaClient
         {
             var existingData = await _stockData.GetHistory(symbol);
 
-            var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
-            if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
-                return existingData;
-            else
-            {
+            //var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
+            //if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
+            //    return existingData;
+            //else
+            //{
                 var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(symbol, true));
 
                 var history = TransformSeries(data);
@@ -40,7 +40,7 @@ namespace PortfolioTracker.AlphaClient
                 await _stockData.SaveHistory(history);
 
                 return history;
-            }
+            //}
         }
 
         private StockHistory MergeHistories(StockHistory updatedData, StockHistory existingData)

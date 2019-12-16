@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="4.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PortfolioTracker.AlphaClient\PortfolioTracker.AlphaClient.csproj" />
     <ProjectReference Include="..\PortfolioTracker.DataAccess\PortfolioTracker.DataAccess.csproj" />
     <ProjectReference Include="..\PortfolioTracker.Models\PortfolioTracker.Models.csproj" />
