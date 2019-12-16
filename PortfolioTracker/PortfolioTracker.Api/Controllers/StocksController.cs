@@ -28,7 +28,7 @@ namespace PortfolioTracker.Api.Controllers
         }
 
         // GET api/values/5
-        [HttpGet]
+        [Route("{symbol}/History")]
         public async Task<ActionResult<ReturnObject<StockHistory>>> Get(string symbol)
         {
             {

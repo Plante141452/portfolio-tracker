@@ -1,4 +1,5 @@
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PortfolioTracker.Client;
@@ -21,6 +22,7 @@ namespace PortfolioTracker.Origin.Functions
                 var client = new StockClient();
                 var result = await client.GetHistory(item.Symbol);
                 log.LogInformation($"C# ServiceBus queue trigger function completed api call for symbol {item.Symbol}. Success: {result.Success}");
+
             }
             catch (Exception ex)
             {

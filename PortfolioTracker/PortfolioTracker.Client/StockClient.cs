@@ -21,7 +21,7 @@ namespace PortfolioTracker.Client
             var response = await _stockClient.ExecuteGetTaskAsync<ReturnObject<StockHistory>>(new RestRequest
             {
                 Method = Method.GET,
-                Resource = $"stocks?symbol={symbol}"
+                Resource = $"stocks/{symbol}/history"
             });
 
             if (response.StatusCode == HttpStatusCode.OK)

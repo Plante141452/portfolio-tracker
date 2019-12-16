@@ -56,7 +56,7 @@ namespace PortfolioTracker.AlphaClient
             StockHistoryItem lastClosing = updatedData.History.First();
             foreach (var history in updatedData.History.Skip(1))
             {
-                history.AdjustedClose = lastClosing.AdjustedPercentChanged > 0 ? lastClosing.AdjustedClose / lastClosing.AdjustedPercentChanged : lastClosing.AdjustedClose;
+                history.AdjustedClose = Math.Round(lastClosing.AdjustedPercentChanged > 0 ? lastClosing.AdjustedClose / lastClosing.AdjustedPercentChanged : lastClosing.AdjustedClose, 2);
                 lastClosing = history;
             }
 
@@ -77,8 +77,8 @@ namespace PortfolioTracker.AlphaClient
                 {
                     ClosingDate = dp.Time,
                     Volume = dp.Volume,
-                    AdjustedClose = dp.ClosingPrice,
-                    AdjustedPercentChanged = i == history.Count - 1 ? 0 : dp.ClosingPrice / history[i + 1].ClosingPrice
+                    AdjustedClose = Math.Round(dp.ClosingPrice, 2),
+                    AdjustedPercentChanged = Math.Round(i == history.Count - 1 ? 0 : dp.ClosingPrice / history[i + 1].ClosingPrice, 4)
                 }).ToList()
             };
         }
@@ -132,7 +132,7 @@ namespace PortfolioTracker.AlphaClient
                 quotesToRefresh = quotes.Select(q => new Quote
                 {
                     Symbol = q.Symbol,
-                    Price = q.Price,
+                    Price = Math.Round(q.Price, 2),
                     QuoteDate = q.Time,
                     UpdatedDate = DateTimeOffset.UtcNow
                 }).ToList();
