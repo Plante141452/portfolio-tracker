@@ -6,7 +6,15 @@ using Newtonsoft.Json;
 
 namespace PortfolioTracker.Client
 {
-    public class QueueWrapper
+    public interface IQueueWrapper
+    {
+        Task QueueMessage(QueueMessage message);
+        Task QueueMessage(QueueMessage message, TimeSpan delay);
+        void HandleMessages(Action<QueueMessage> handler, Action<Exception> handleException);
+        void StopListening();
+    }
+
+    public class QueueWrapper : IQueueWrapper
     {
         private readonly IQueueClient _queueClient;
         private static string _connectionString = "Endpoint=sb://portfolio-tracker.servicebus.windows.net/;SharedAccessKeyName=master;SharedAccessKey=99M8mGw/0+lBSA/gxGaYxnJsmWLIlYUo6HqdbHKuTYo=";
