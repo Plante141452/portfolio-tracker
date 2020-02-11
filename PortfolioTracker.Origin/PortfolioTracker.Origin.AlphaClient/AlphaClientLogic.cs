@@ -7,18 +7,21 @@ using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.Origin.AlphaClient.Interfaces;
 using PortfolioTracker.Origin.Common.Models;
 using PortfolioTracker.Origin.DataAccess.Interfaces;
+using PortfolioTracker.Origin.IEX;
 
 namespace PortfolioTracker.Origin.AlphaClient
 {
     public class AlphaClientLogic : IAlphaClientLogic
     {
         private readonly IAlphaClientWrapper _alphaClient;
+        private readonly IIEXClient _iexClient;
         private readonly IStockDataAccess _stockData;
 
-        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IStockDataAccess stockData)
+        public AlphaClientLogic(IAlphaClientWrapper alphaClient, IIEXClient iexClient, IStockDataAccess stockData)
         {
             _alphaClient = alphaClient;
             _stockData = stockData;
+            _iexClient = iexClient;
         }
 
         public async Task<List<StockHistory>> GetHistory(List<string> symbols)
@@ -35,7 +38,7 @@ namespace PortfolioTracker.Origin.AlphaClient
                 else
                 {
                     var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
-                    
+
                     var history = TransformSeries(data);
 
                     if (existingData != null)
@@ -115,13 +118,15 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             foreach (var quote in existingQuotes)
             {
-                if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 5)
-                    quotesToRefresh.Add(quote);
-                else
+                if (symbols.Contains(quote.Symbol))
                 {
-                    if (symbols.Contains(quote.Symbol))
+                    if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
+                        quotesToRefresh.Add(quote);
+                    else
+                    {
                         symbols.Remove(quote.Symbol);
-                    quotesToReuse.Add(quote);
+                        quotesToReuse.Add(quote);
+                    }
                 }
             }
 
@@ -129,19 +134,63 @@ namespace PortfolioTracker.Origin.AlphaClient
 
             if (symbolsToRetrieve.Any())
             {
-                var quotes = await _alphaClient.Execute(x => x.RequestBatchQuotesAsync(symbolsToRetrieve.ToArray()));
-                quotesToRefresh = quotes.Select(q => new Quote
+                ConcurrentQueue<Quote> quotes = new ConcurrentQueue<Quote>();
+                await Task.WhenAll(symbolsToRetrieve.Select(symbol => Task.Run(async () =>
                 {
-                    Symbol = q.Symbol,
-                    Price = q.Price,
-                    QuoteDate = q.Time,
-                    UpdatedDate = DateTimeOffset.UtcNow
-                }).ToList();
+                    var quote = await _iexClient.GetQuote(symbol);
+                    if (quote != null)
+                        quotes.Enqueue(new Quote
+                        {
+                            Symbol = quote.symbol,
+                            Price = quote.latestPrice,
+                            QuoteDate = quote.latestUpdate,
+                            UpdatedDate = DateTimeOffset.UtcNow
+                        });
+                })));
 
+                quotesToRefresh = quotes.ToList();
                 await _stockData.SaveQuotes(quotesToRefresh);
             }
 
             return quotesToReuse.Union(quotesToRefresh).ToList();
         }
+
+        //public async Task<List<Quote>> GetQuotes(List<string> symbols)
+        //{
+        //    var existingQuotes = await _stockData.GetQuotes();
+        //
+        //    List<Quote> quotesToReuse = new List<Quote>();
+        //    List<Quote> quotesToRefresh = new List<Quote>();
+        //
+        //    foreach (var quote in existingQuotes)
+        //    {
+        //        if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 5)
+        //            quotesToRefresh.Add(quote);
+        //        else
+        //        {
+        //            if (symbols.Contains(quote.Symbol))
+        //                symbols.Remove(quote.Symbol);
+        //            quotesToReuse.Add(quote);
+        //        }
+        //    }
+        //
+        //    var symbolsToRetrieve = quotesToRefresh.Select(q => q.Symbol).Union(symbols).Distinct().ToList();
+        //
+        //    if (symbolsToRetrieve.Any())
+        //    {
+        //        var quotes = await _alphaClient.Execute(x => x.RequestBatchQuotesAsync(symbolsToRetrieve.ToArray()));
+        //        quotesToRefresh = quotes.Select(q => new Quote
+        //        {
+        //            Symbol = q.Symbol,
+        //            Price = q.Price,
+        //            QuoteDate = q.Time,
+        //            UpdatedDate = DateTimeOffset.UtcNow
+        //        }).ToList();
+        //
+        //        await _stockData.SaveQuotes(quotesToRefresh);
+        //    }
+        //
+        //    return quotesToReuse.Union(quotesToRefresh).ToList();
+        //}
     }
 }

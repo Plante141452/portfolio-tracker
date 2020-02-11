@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PortfolioTracker.Origin.AlphaClient;
 using PortfolioTracker.Origin.Common.Models;
@@ -16,18 +17,19 @@ namespace PortfolioTracker.Origin.Api.Controllers
 
         public QuotesController()
         {
-            var clientFactory = new AlphaVantageStocksClientFactory(new ApiKeyProvider());
-            //var iexClient = new IEXClient();
-            _alphaClientLogic = new AlphaClientLogic(new AlphaClientWrapper(clientFactory), new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider())));
+            var alphaClient = new AlphaClientWrapper(new AlphaVantageStocksClientFactory(new ApiKeyProvider()));
+            var iexClient = new IEXClient();
+            var stockData = new StockDataAccess(new MongoClientWrapper(new ConnectionStringProvider()));
+            _alphaClientLogic = new AlphaClientLogic(alphaClient, iexClient, stockData);
         }
 
         // GET api/values/5
         [HttpGet]
-        public ActionResult<List<Quote>> Get(string symbols)
+        public async Task<ActionResult<List<Quote>>> Get(string symbols)
         {
             {
                 var quoteSymbols = symbols.Split(',').ToList();
-                return _alphaClientLogic.GetQuotes(quoteSymbols).GetAwaiter().GetResult();
+                return await _alphaClientLogic.GetQuotes(quoteSymbols);
             }
         }
     }

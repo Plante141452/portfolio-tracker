@@ -260,11 +260,33 @@ namespace PortfolioTracker.Origin.RebalanceLogic
                     break;
 
                 var factorToUse = quickRebalance
-                    ? availableFactors.Where(f => f.Price < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
+                    ? availableFactors.Where(f => f.Price * 1.05m < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
                     : availableFactors.Aggregate((f1, f2) =>
                     {
-                        var f1Adjusted = ((f1.EndAmount + 1) * f1.Price) / portfolioValue;
-                        var f2Adjusted = ((f2.EndAmount + 1) * f2.Price) / portfolioValue;
+                        bool buyingF1 = f1.CurrentShares >= f1.EndAmount;
+                        bool buyingF2 = f2.CurrentShares >= f2.EndAmount;
+
+                        var f1Min = f1.MinAmount / idealTotalFactor;
+                        var f2Min = f2.MinAmount / idealTotalFactor;
+
+                        bool notEnoughF1 = f1.CurrentFactor < f1Min;
+                        bool notEnoughF2 = f2.CurrentFactor < f2Min;
+                        if (notEnoughF1 != notEnoughF2)
+                            return notEnoughF1 ? f1 : f2;
+
+                        var f1Max = f1.MaxAmount / idealTotalFactor;
+                        var f2Max = f2.MaxAmount / idealTotalFactor;
+
+                        var f1Price = f1.Price * (buyingF1 ? 1.04m : .96m);
+                        var f2Price = f2.Price * (buyingF2 ? 1.04m : .96m);
+                        var f1Adjusted = ((f1.EndAmount + 1) * f1Price) / portfolioValue;
+                        var f2Adjusted = ((f2.EndAmount + 1) * f2Price) / portfolioValue;
+
+                        bool tooMuchF1 = f1Adjusted > f1Max;
+                        bool tooMuchF2 = f2Adjusted > f2Max;
+                        if (tooMuchF1 != tooMuchF2)
+                            return tooMuchF1 ? f2 : f1;
+
                         var f1Dif = Math.Abs(f1.DesiredFactor - f1Adjusted);
                         var f2Dif = Math.Abs(f2.DesiredFactor - f2Adjusted);
                         return f1Dif < f2Dif ? f1 : f2;
