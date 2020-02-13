@@ -10,8 +10,8 @@ namespace PortfolioTracker.Client
     {
         Task QueueMessage(QueueMessage message);
         Task QueueMessage(QueueMessage message, TimeSpan delay);
-        void HandleMessages(Action<QueueMessage> handler, Action<Exception> handleException);
-        void StopListening();
+        void HandleMessages(Func<QueueMessage, Task> handler, Action<Exception> handleException);
+        Task StopListening();
     }
 
     public class QueueWrapper : IQueueWrapper
@@ -45,19 +45,19 @@ namespace PortfolioTracker.Client
             await _queueClient.ScheduleMessageAsync(azureMessage, scheduleTime);
         }
 
-        public void HandleMessages(Action<QueueMessage> handler, Action<Exception> handleException)
+        public void HandleMessages(Func<QueueMessage, Task> handler, Action<Exception> handleException)
         {
-            _queueClient.RegisterMessageHandler((azureMessage, token) => Task.Run(() =>
+            _queueClient.RegisterMessageHandler((azureMessage, token) => Task.Run(async () =>
             {
                 string messageContent = Encoding.UTF8.GetString(azureMessage.Body);
                 QueueMessage message = JsonConvert.DeserializeObject<QueueMessage>(messageContent);
-                handler(message);
+                await handler(message);
             }, token), args => Task.Run(() => handleException(args.Exception)));
         }
 
-        public void StopListening()
+        public async Task StopListening()
         {
-            _queueClient.CloseAsync().GetAwaiter().GetResult();
+            await _queueClient.CloseAsync();
         }
     }
 

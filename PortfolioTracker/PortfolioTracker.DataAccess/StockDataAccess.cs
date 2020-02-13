@@ -1,17 +1,22 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using PortfolioTracker.DataAccess.DataTypes;
 using PortfolioTracker.DataAccess.Interfaces;
 using PortfolioTracker.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PortfolioTracker.DataAccess
 {
     public class StockDataAccess : IStockDataAccess
     {
         private readonly IMongoClientWrapper _mongoWrapper;
+
+        public StockDataAccess()
+            : this(new MongoClientWrapper())
+        {
+        }
 
         public StockDataAccess(IMongoClientWrapper mongoWrapper)
         {

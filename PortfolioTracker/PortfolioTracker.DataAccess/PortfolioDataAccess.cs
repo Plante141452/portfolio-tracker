@@ -7,7 +7,7 @@ using MongoDB.Driver;
 using PortfolioTracker.DataAccess.DataTypes;
 using PortfolioTracker.DataAccess.Interfaces;
 
-namespace PortfolioTracker.Origin.DataAccess
+namespace PortfolioTracker.DataAccess
 {
     public class PortfolioDataAccess : IPortfolioDataAccess
     {

@@ -9,8 +9,8 @@
     <ProjectGuid>{EBF49C6D-C696-42E1-9C78-B7A0A9A3FC57}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PortfolioTracker.Origin.RebalanceLogic.Tests</RootNamespace>
-    <AssemblyName>PortfolioTracker.Origin.RebalanceLogic.Tests</AssemblyName>
+    <RootNamespace>PortfolioTracker.RebalanceLogic.Tests</RootNamespace>
+    <AssemblyName>PortfolioTracker.RebalanceLogic.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -79,8 +79,8 @@
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=106.6.10.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.106.6.10\lib\net452\RestSharp.dll</HintPath>
+    <Reference Include="RestSharp, Version=106.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.10.1\lib\net452\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="SharpCompress, Version=0.23.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.23.0\lib\net45\SharpCompress.dll</HintPath>
@@ -117,29 +117,25 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PortfolioTracker.Origin.AlphaClient\PortfolioTracker.Origin.AlphaClient.csproj">
-      <Project>{294ccef7-f44c-4351-ad0d-2897aad9666c}</Project>
-      <Name>PortfolioTracker.Origin.AlphaClient</Name>
+    <ProjectReference Include="..\PortfolioTracker.AlphaClient\PortfolioTracker.AlphaClient.csproj">
+      <Project>{d4a7acc5-b7a8-43cb-a1ca-6a41462deb14}</Project>
+      <Name>PortfolioTracker.AlphaClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Logic\PortfolioTracker.Origin.Common.Logic.csproj">
-      <Project>{5396744d-0d96-460a-8f11-2e37fb02d873}</Project>
-      <Name>PortfolioTracker.Origin.Common.Logic</Name>
+    <ProjectReference Include="..\PortfolioTracker.Client\PortfolioTracker.Client.csproj">
+      <Project>{349423CD-E80B-46F3-9007-2256EA8CE6BF}</Project>
+      <Name>PortfolioTracker.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.Common.Models\PortfolioTracker.Origin.Common.Models.csproj">
-      <Project>{E82488A7-F5D3-404F-8BB9-5E525DB52950}</Project>
-      <Name>PortfolioTracker.Origin.Common.Models</Name>
+    <ProjectReference Include="..\PortfolioTracker.DataAccess\PortfolioTracker.DataAccess.csproj">
+      <Project>{70d218d7-b727-4d34-a967-b5b427984e52}</Project>
+      <Name>PortfolioTracker.DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.DataAccess\PortfolioTracker.Origin.DataAccess.csproj">
-      <Project>{2CD78185-676F-4D92-AB62-065A0B17ADCF}</Project>
-      <Name>PortfolioTracker.Origin.DataAccess</Name>
+    <ProjectReference Include="..\PortfolioTracker.IexClient\PortfolioTracker.IexClient.csproj">
+      <Project>{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}</Project>
+      <Name>PortfolioTracker.IexClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.IEX\PortfolioTracker.Origin.IEX.csproj">
-      <Project>{5d2ac4cb-e410-4ccb-ba0e-691500444a44}</Project>
-      <Name>PortfolioTracker.Origin.IEX</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PortfolioTracker.Origin.RebalanceLogic\PortfolioTracker.Origin.RebalanceLogic.csproj">
-      <Project>{BFB76738-74DC-41BC-9D1B-1FC344DD7310}</Project>
-      <Name>PortfolioTracker.Origin.RebalanceLogic</Name>
+    <ProjectReference Include="..\PortfolioTracker.Models\PortfolioTracker.Models.csproj">
+      <Project>{bdfdf64b-4f2f-4756-8c42-4d4947706183}</Project>
+      <Name>PortfolioTracker.Models</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

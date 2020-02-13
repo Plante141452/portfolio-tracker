@@ -14,6 +14,11 @@ namespace PortfolioTracker.DataAccess
 
         private MongoClient MongoClient => _mongoClientLazy.Value;
 
+        public MongoClientWrapper()
+            : this(new ConnectionStringProvider())
+        {
+        }
+
         public MongoClientWrapper(IConnectionStringProvider connectionStringProvider)
         {
             _mongoClientLazy = new Lazy<MongoClient>(() => new MongoClient(connectionStringProvider.ConnectionString));

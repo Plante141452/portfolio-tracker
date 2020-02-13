@@ -1,11 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.902
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Client", "PortfolioTracker.Client\PortfolioTracker.Client.csproj", "{349423CD-E80B-46F3-9007-2256EA8CE6BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.StockEventListener", "PortfolioTracker.StockEventListener\PortfolioTracker.StockEventListener.csproj", "{256D3989-EFFF-4B8A-8DD5-A99467D227BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.StockEventListener", "PortfolioTracker.StockEventListener\PortfolioTracker.StockEventListener.csproj", "{256D3989-EFFF-4B8A-8DD5-A99467D227BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.AlphaClient", "PortfolioTracker.AlphaClient\PortfolioTracker.AlphaClient.csproj", "{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AlphaVantage", "AlphaVantage", "{16A28352-9E36-4B25-8155-61C60993CDD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Models", "PortfolioTracker.Models\PortfolioTracker.Models.csproj", "{BDFDF64B-4F2F-4756-8C42-4D4947706183}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{4E08C767-B19B-4BCF-9B32-EF7AA60B996D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.DataAccess", "PortfolioTracker.DataAccess\PortfolioTracker.DataAccess.csproj", "{70D218D7-B727-4D34-A967-B5B427984E52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IEX", "IEX", "{1FB43F71-5EAA-4106-88EF-0C401CA09151}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.IexClient", "PortfolioTracker.IexClient\PortfolioTracker.IexClient.csproj", "{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Client.Tests", "PortfolioTracker.Client.Tests\PortfolioTracker.Client.Tests.csproj", "{45CD53DC-67E3-4523-A444-3421042741AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +37,37 @@ Global
 		{256D3989-EFFF-4B8A-8DD5-A99467D227BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{256D3989-EFFF-4B8A-8DD5-A99467D227BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{256D3989-EFFF-4B8A-8DD5-A99467D227BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDFDF64B-4F2F-4756-8C42-4D4947706183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDFDF64B-4F2F-4756-8C42-4D4947706183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDFDF64B-4F2F-4756-8C42-4D4947706183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDFDF64B-4F2F-4756-8C42-4D4947706183}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70D218D7-B727-4D34-A967-B5B427984E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70D218D7-B727-4D34-A967-B5B427984E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70D218D7-B727-4D34-A967-B5B427984E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70D218D7-B727-4D34-A967-B5B427984E52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45CD53DC-67E3-4523-A444-3421042741AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45CD53DC-67E3-4523-A444-3421042741AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45CD53DC-67E3-4523-A444-3421042741AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45CD53DC-67E3-4523-A444-3421042741AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{349423CD-E80B-46F3-9007-2256EA8CE6BF} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
+		{D4A7ACC5-B7A8-43CB-A1CA-6A41462DEB14} = {16A28352-9E36-4B25-8155-61C60993CDD9}
+		{BDFDF64B-4F2F-4756-8C42-4D4947706183} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
+		{70D218D7-B727-4D34-A967-B5B427984E52} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
+		{E54E1DF5-A7B4-4D2D-9F25-B3A364582785} = {1FB43F71-5EAA-4106-88EF-0C401CA09151}
+		{45CD53DC-67E3-4523-A444-3421042741AA} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4EF2E0DD-7B0C-4EF3-925B-7246D342A8EB}

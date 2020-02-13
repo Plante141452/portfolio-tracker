@@ -7,6 +7,11 @@ namespace PortfolioTracker.AlphaClient
     {
         private readonly IApiKeyProvider _apiKeyProvider;
 
+        public AlphaVantageStocksClientFactory()
+            : this(new ApiKeyProvider())
+        {
+        }
+
         public AlphaVantageStocksClientFactory(IApiKeyProvider apiKeyProvider)
         {
             _apiKeyProvider = apiKeyProvider;
