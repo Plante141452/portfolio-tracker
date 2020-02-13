@@ -6,12 +6,18 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using PortfolioTracker.DataAccess.DataTypes;
 using PortfolioTracker.DataAccess.Interfaces;
+using PortfolioTracker.Models;
 
 namespace PortfolioTracker.DataAccess
 {
     public class PortfolioDataAccess : IPortfolioDataAccess
     {
         private readonly IMongoClientWrapper _mongoWrapper;
+
+        public PortfolioDataAccess()
+            : this(new MongoClientWrapper())
+        {
+        }
 
         public PortfolioDataAccess(IMongoClientWrapper mongoWrapper)
         {

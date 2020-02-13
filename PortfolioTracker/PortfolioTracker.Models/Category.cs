@@ -1,4 +1,4 @@
-﻿namespace PortfolioTracker.DataAccess.DataTypes
+﻿namespace PortfolioTracker.Models
 {
     public class Category : CategoryCollection
     {

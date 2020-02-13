@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.DataAccess;
 using PortfolioTracker.DataAccess.Interfaces;
 using PortfolioTracker.IexClient;
@@ -38,64 +37,12 @@ namespace PortfolioTracker.Client
                 var existingData = await _stockData.GetHistory(s);
 
                 var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
-                if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
-                    histories.Enqueue(existingData);
-                else
-                {
+                if (lastRecordedClose == null || !(DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8))
                     await _alphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateWeeklyEvent, Content = s });
-                    //var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(s, true));
-                    //
-                    //var history = TransformSeries(data);
-                    //
-                    //if (existingData != null)
-                    //    history = MergeHistories(history, existingData);
-                    //
-                    //histories.Enqueue(history);
-                    //await _stockData.SaveHistory(history);
-                }
+                histories.Enqueue(existingData);
             })));
 
             return histories.ToList();
-        }
-
-        private StockHistory MergeHistories(StockHistory updatedData, StockHistory existingData)
-        {
-            var existingDataToMerge = existingData.History.Where(h => !updatedData.History.Any(uh => uh.ClosingDate.Date.Equals(h.ClosingDate.Date))).ToList();
-
-            if (existingDataToMerge.Count == existingData.History.Count)
-                throw new Exception("Cannot merge historical data as they do not overlap.");
-
-            updatedData.History.AddRange(existingDataToMerge);
-            updatedData.History = updatedData.History.OrderByDescending(h => h.ClosingDate).ToList();
-
-            StockHistoryItem lastClosing = updatedData.History.First();
-            foreach (var history in updatedData.History.Skip(1))
-            {
-                history.AdjustedClose = lastClosing.AdjustedPercentChanged > 0 ? lastClosing.AdjustedClose / lastClosing.AdjustedPercentChanged : lastClosing.AdjustedClose;
-                lastClosing = history;
-            }
-
-            return updatedData;
-        }
-
-        private StockHistory TransformSeries(StockTimeSeries series)
-        {
-            List<StockDataPoint> history = series.DataPoints.ToList();
-
-            if (DateTimeOffset.UtcNow.Subtract(history.First().Time).TotalDays < 1)
-                history = history.Skip(1).ToList();
-
-            return new StockHistory
-            {
-                Symbol = series.Symbol,
-                History = history.Select((dp, i) => new StockHistoryItem
-                {
-                    ClosingDate = dp.Time,
-                    Volume = dp.Volume,
-                    AdjustedClose = dp.ClosingPrice,
-                    AdjustedPercentChanged = i == history.Count - 1 ? 0 : dp.ClosingPrice / history[i + 1].ClosingPrice
-                }).ToList()
-            };
         }
 
         public async Task<List<PortfolioHistoryPeriod>> GetPortfolioHistory(List<string> symbols)

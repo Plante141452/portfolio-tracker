@@ -1,6 +1,6 @@
-﻿using PortfolioTracker.DataAccess.DataTypes;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PortfolioTracker.Models;
 
 namespace PortfolioTracker.DataAccess.Interfaces
 {

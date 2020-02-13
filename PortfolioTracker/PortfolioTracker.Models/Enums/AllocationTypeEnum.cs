@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PortfolioTracker.DataAccess.DataTypes
+namespace PortfolioTracker.Models.Enums
 {
     public enum AllocationTypeEnum
     {

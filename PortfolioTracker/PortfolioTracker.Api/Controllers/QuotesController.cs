@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PortfolioTracker.Client;
 using PortfolioTracker.Models;
@@ -8,22 +9,22 @@ namespace PortfolioTracker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StocksController : ControllerBase
+    public class QuotesController : ControllerBase
     {
-        private readonly IStockApiWrapper _stockApiWrapper;
+        private readonly IStockApiWrapper _alphaClientLogic;
 
-        public StocksController()
+        public QuotesController()
         {
-            _stockApiWrapper = new StockApiWrapper();
+            _alphaClientLogic = new StockApiWrapper();
         }
 
         // GET api/values/5
         [HttpGet]
-        public ActionResult<List<StockHistory>> Get(string symbols)
+        public async Task<ActionResult<List<Quote>>> Get(string symbols)
         {
             {
                 var quoteSymbols = symbols.Split(',').ToList();
-                return _stockApiWrapper.GetHistory(quoteSymbols).GetAwaiter().GetResult();
+                return await _alphaClientLogic.GetQuotes(quoteSymbols);
             }
         }
     }
