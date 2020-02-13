@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks;
+using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks;
 
 namespace PortfolioTracker.AlphaClient.Interfaces
 {
     public interface IAlphaClientWrapper
     {
-        Task<T> Execute<T>(Func<AlphaVantageStocksClient, T> func);
         Task<T> Execute<T>(Func<AlphaVantageStocksClient, Task<T>> task);
     }
 }

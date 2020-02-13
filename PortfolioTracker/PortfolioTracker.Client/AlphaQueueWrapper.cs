@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.AlphaClient;
+using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks.TimeSeries;
 using PortfolioTracker.AlphaClient.Interfaces;
 using PortfolioTracker.DataAccess;
 using PortfolioTracker.DataAccess.Interfaces;
@@ -58,7 +58,6 @@ namespace PortfolioTracker.Client
                         if (delayTime.TotalMilliseconds > 10)
                         {
                             AlphaQueue.QueueMessage(message, delayTime).GetAwaiter().GetResult();
-                            RequestTimeLog.Enqueue(requestTime);
                             return;
                         }
 
@@ -76,7 +75,7 @@ namespace PortfolioTracker.Client
                     default:
                         throw new Exception("Invalid Event Type!");
                 }
-            }, ex => throw ex);
+            }, ex => Console.WriteLine(ex.Message));
         }
 
         #region UpdateWeekly

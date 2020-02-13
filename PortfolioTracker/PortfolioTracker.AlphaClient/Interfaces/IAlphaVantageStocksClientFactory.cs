@@ -1,4 +1,4 @@
-﻿using AlphaVantage.Net.Stocks;
+﻿using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks;
 
 namespace PortfolioTracker.AlphaClient.Interfaces
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using AlphaVantage.Net.Stocks;
+using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks;
 using PortfolioTracker.AlphaClient.Interfaces;
 
 namespace PortfolioTracker.AlphaClient
@@ -20,27 +20,19 @@ namespace PortfolioTracker.AlphaClient
             _clientFactory = clientFactory;
         }
 
-        public async Task<T> Execute<T>(Func<AlphaVantageStocksClient, Task<T>> task)
+        public async Task<T> Execute<T>(Func<AlphaVantageStocksClient, Task<T>> exec)
         {
-            return await await Execute<Task<T>>(task);
-        }
+            var client = _clientFactory.GetClient();
 
-        public async Task<T> Execute<T>(Func<AlphaVantageStocksClient, T> func)
-        {
-            return await Task.Run(() =>
+            try
             {
-                var client = _clientFactory.GetClient();
-
-                try
-                {
-                    return func(client);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    throw ex;
-                }
-            });
+                return await exec(client);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
         }
     }
 }
