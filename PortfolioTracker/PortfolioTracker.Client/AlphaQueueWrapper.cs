@@ -46,51 +46,62 @@ namespace PortfolioTracker.Client
         {
             AlphaQueue.HandleMessages(async message =>
             {
-                lock (RequestWaitLock)
+                try
                 {
-                    if (RequestTimeLog.Count >= RequestsPerMinute)
+                    switch (message.EventType)
                     {
-                        RequestTimeLog.TryPeek(out var lastRequest);
-                        var requestTime = lastRequest.AddMinutes(1.1);
-
-                        var delayTime = requestTime.Subtract(DateTimeOffset.UtcNow);
-
-                        if (delayTime.TotalMilliseconds > 10)
-                        {
-                            AlphaQueue.QueueMessage(message, delayTime).GetAwaiter().GetResult();
-                            return;
-                        }
-
-                        RequestTimeLog.TryDequeue(out _);
+                        case UpdateWeeklyEvent:
+                            await UpdateWeekly(message);
+                            break;
+                        default:
+                            throw new Exception("Invalid Event Type!");
                     }
-
-                    RequestTimeLog.Enqueue(DateTimeOffset.UtcNow);
                 }
-
-                switch (message.EventType)
+                catch (Exception ex)
                 {
-                    case UpdateWeeklyEvent:
-                        await UpdateWeekly(message.Content);
-                        break;
-                    default:
-                        throw new Exception("Invalid Event Type!");
+                    Console.WriteLine($"Something went wrong: {ex.Message}");
                 }
             }, ex => Console.WriteLine(ex.Message));
         }
 
         #region UpdateWeekly
 
-        private async Task UpdateWeekly(string stockSymbol)
+        private async Task UpdateWeekly(QueueMessage message)
         {
-            await GetHistory(stockSymbol);
-        }
-
-        private async Task GetHistory(string symbol)
-        {
-            ConcurrentQueue<StockHistory> histories = new ConcurrentQueue<StockHistory>();
-
+            string symbol = message.Content;
             var existingData = await _stockDataAccess.GetHistory(symbol);
 
+            var lastRecordedClose = existingData?.History?.Max(h => h.ClosingDate);
+            if (lastRecordedClose != null && DateTimeOffset.UtcNow.Subtract(lastRecordedClose.Value).TotalDays < 8)
+                return;
+
+            lock (RequestWaitLock)
+            {
+                if (RequestTimeLog.Count >= RequestsPerMinute)
+                {
+                    RequestTimeLog.TryPeek(out var lastRequest);
+                    var requestTime = lastRequest.AddMinutes(1.1);
+
+                    var delayTime = requestTime.Subtract(DateTimeOffset.UtcNow);
+
+                    if (delayTime.TotalMilliseconds > 10)
+                    {
+                        AlphaQueue.QueueMessage(message, delayTime).GetAwaiter().GetResult();
+                        return;
+                    }
+
+                    RequestTimeLog.TryDequeue(out _);
+                }
+
+                RequestTimeLog.Enqueue(DateTimeOffset.UtcNow);
+            }
+
+            await GetHistory(symbol, existingData);
+        }
+
+        private async Task GetHistory(string symbol, StockHistory existingData)
+        {
+            Console.WriteLine($"Updated {symbol}");
             var data = await _alphaClient.Execute(svc => svc.RequestWeeklyTimeSeriesAsync(symbol, true));
 
             var history = TransformSeries(data);
@@ -98,7 +109,6 @@ namespace PortfolioTracker.Client
             if (existingData != null)
                 history = MergeHistories(history, existingData);
 
-            histories.Enqueue(history);
             await _stockDataAccess.SaveHistory(history);
         }
 

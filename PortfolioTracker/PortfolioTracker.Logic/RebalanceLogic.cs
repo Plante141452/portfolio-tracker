@@ -256,7 +256,7 @@ namespace PortfolioTracker.Logic
                     break;
 
                 var factorToUse = quickRebalance
-                    ? availableFactors.Where(f => f.Price * 1.05m < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
+                    ? availableFactors.Where(f => f.Price * 1.02m < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
                     : availableFactors.Aggregate((f1, f2) =>
                     {
                         bool buyingF1 = f1.CurrentShares >= f1.EndAmount;
@@ -273,8 +273,8 @@ namespace PortfolioTracker.Logic
                         var f1Max = f1.MaxAmount / idealTotalFactor;
                         var f2Max = f2.MaxAmount / idealTotalFactor;
 
-                        var f1Price = f1.Price * (buyingF1 ? 1.04m : .96m);
-                        var f2Price = f2.Price * (buyingF2 ? 1.04m : .96m);
+                        var f1Price = f1.Price * (buyingF1 ? 1.02m : .96m);
+                        var f2Price = f2.Price * (buyingF2 ? 1.02m : .96m);
                         var f1Adjusted = ((f1.EndAmount + 1) * f1Price) / portfolioValue;
                         var f2Adjusted = ((f2.EndAmount + 1) * f2Price) / portfolioValue;
 

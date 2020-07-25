@@ -66,24 +66,16 @@ namespace PortfolioTracker.Client
         {
             var existingQuotes = await _stockData.GetQuotes();
 
-            List<Quote> quotesToReuse = new List<Quote>();
-            List<Quote> quotesToRefresh = new List<Quote>();
+            List<Quote> result = new List<Quote>();
+            List<string> symbolsToRetrieve = symbols.Where(s => existingQuotes.All(q => q.Symbol != s)).ToList();
 
             foreach (var quote in existingQuotes)
             {
-                if (symbols.Contains(quote.Symbol))
-                {
-                    if (DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
-                        quotesToRefresh.Add(quote);
-                    else
-                    {
-                        symbols.Remove(quote.Symbol);
-                        quotesToReuse.Add(quote);
-                    }
-                }
+                if (symbols.Contains(quote.Symbol) && DateTimeOffset.UtcNow.Subtract(quote.UpdatedDate).TotalMinutes > 15)
+                    symbolsToRetrieve.Add(quote.Symbol);
+                else
+                    result.Add(quote);
             }
-
-            var symbolsToRetrieve = quotesToRefresh.Select(q => q.Symbol).Union(symbols).Distinct().ToList();
 
             if (symbolsToRetrieve.Any())
             {
@@ -101,11 +93,12 @@ namespace PortfolioTracker.Client
                         });
                 })));
 
-                quotesToRefresh = quotes.ToList();
-                await _stockData.SaveQuotes(quotesToRefresh);
+                var refreshedQuotes = quotes.ToList();
+                result.AddRange(refreshedQuotes);
+                await _stockData.SaveQuotes(refreshedQuotes);
             }
 
-            return quotesToReuse.Union(quotesToRefresh).ToList();
+            return result;
         }
     }
 }

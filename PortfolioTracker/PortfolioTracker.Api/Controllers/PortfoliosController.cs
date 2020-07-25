@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PortfolioTracker.Client;
 using PortfolioTracker.DataAccess;
@@ -27,40 +29,77 @@ namespace PortfolioTracker.Api.Controllers
 
         //5d80d0587d2d4657d8e1fe8f
         [HttpGet("{id}")]
-        public ActionResult<Portfolio> Get(string id)
+        public async Task<ActionResult<ReturnObject<Portfolio>>> Get(string id)
         {
             {
-                return _portfolioDataAccess.GetPortfolio(id).GetAwaiter().GetResult();
+                var ret = new ReturnObject<Portfolio> { Success = true };
+
+                try
+                {
+                    ret.Data = await _portfolioDataAccess.GetPortfolio(id);
+                }
+                catch (Exception ex)
+                {
+                    ret.Success = false;
+                    ret.Messages = new List<ReturnMessage> {new ReturnMessage{ MessageType = MessageTypeEnum.Error, Message = ex.Message}};
+                }
+
+                return ret;
             }
         }
 
         [HttpPut("{id}")]
-        public ActionResult<Portfolio> Put(string id, [FromBody] Portfolio portfolio)
+        public async Task<ActionResult<ReturnObject<Portfolio>>> Put(string id, [FromBody] Portfolio portfolio)
         {
             {
-                var portfolios = new List<Portfolio> { portfolio };
-                var results = _portfolioDataAccess.SavePortfolios(portfolios).GetAwaiter().GetResult();
-                return results.FirstOrDefault();
+
+                var ret = new ReturnObject<Portfolio> { Success = true };
+
+                try
+                {
+                    var portfolios = new List<Portfolio> { portfolio };
+                    var results =await  _portfolioDataAccess.SavePortfolios(portfolios);
+                    ret.Data =results.FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+                    ret.Success = false;
+                    ret.Messages = new List<ReturnMessage> {new ReturnMessage{ MessageType = MessageTypeEnum.Error, Message = ex.Message}};
+                }
+
+                return ret;
             }
         }
 
         //5d80d0587d2d4657d8e1fe8f
         [HttpGet("{id}/rebalance")]
-        public ActionResult<RebalanceResult> Rebalance(string id)
+        public async Task<ActionResult<ReturnObject<RebalanceResult>>> Rebalance(string id)
         {
             {
-                Portfolio portfolio = _portfolioDataAccess.GetPortfolio(id).GetAwaiter().GetResult();
+                var ret = new ReturnObject<RebalanceResult> { Success = true };
 
-                var symbols = portfolio.AllStocks.Select(s => s.Symbol).ToList();
-                var quotes = _stockApiWrapper.GetQuotes(symbols).GetAwaiter().GetResult();
-
-                var dataSet = new RebalanceDataSet
+                try
                 {
-                    Portfolio = portfolio,
-                    Quotes = quotes
-                };
+                    Portfolio portfolio = await _portfolioDataAccess.GetPortfolio(id);
 
-                return _rebalanceLogic.Rebalance(dataSet, false);
+                    var symbols = portfolio.AllStocks.Select(s => s.Symbol).ToList();
+                    var quotes = await _stockApiWrapper.GetQuotes(symbols);
+
+                    var dataSet = new RebalanceDataSet
+                    {
+                        Portfolio = portfolio,
+                        Quotes = quotes
+                    };
+
+                    ret.Data = _rebalanceLogic.Rebalance(dataSet, false);
+                }
+                catch (Exception ex)
+                {
+                    ret.Success = false;
+                    ret.Messages = new List<ReturnMessage> {new ReturnMessage{ MessageType = MessageTypeEnum.Error, Message = ex.Message}};
+                }
+
+                return ret;
             }
         }
     }
