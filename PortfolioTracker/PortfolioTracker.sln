@@ -19,13 +19,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.DataAccess
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IEX", "IEX", "{1FB43F71-5EAA-4106-88EF-0C401CA09151}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortfolioTracker.IexClient", "PortfolioTracker.IexClient\PortfolioTracker.IexClient.csproj", "{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.IexClient", "PortfolioTracker.IexClient\PortfolioTracker.IexClient.csproj", "{E54E1DF5-A7B4-4D2D-9F25-B3A364582785}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Client.Tests", "PortfolioTracker.Client.Tests\PortfolioTracker.Client.Tests.csproj", "{45CD53DC-67E3-4523-A444-3421042741AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Api", "PortfolioTracker.Api\PortfolioTracker.Api.csproj", "{56B49EB3-B3A8-40AF-8C58-D43FAD6CA764}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.Logic", "PortfolioTracker.Logic\PortfolioTracker.Logic.csproj", "{E6ABAD2E-B2A8-4B10-A9E9-EBF2F3CF5E4C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortfolioTracker.DataAccess.Tests", "PortfolioTracker.DataAccess.Tests\PortfolioTracker.DataAccess.Tests.csproj", "{3DD248A6-B25F-47C2-832F-92347A66769D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{E6ABAD2E-B2A8-4B10-A9E9-EBF2F3CF5E4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6ABAD2E-B2A8-4B10-A9E9-EBF2F3CF5E4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6ABAD2E-B2A8-4B10-A9E9-EBF2F3CF5E4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DD248A6-B25F-47C2-832F-92347A66769D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD248A6-B25F-47C2-832F-92347A66769D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD248A6-B25F-47C2-832F-92347A66769D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD248A6-B25F-47C2-832F-92347A66769D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +88,7 @@ Global
 		{45CD53DC-67E3-4523-A444-3421042741AA} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
 		{56B49EB3-B3A8-40AF-8C58-D43FAD6CA764} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
 		{E6ABAD2E-B2A8-4B10-A9E9-EBF2F3CF5E4C} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
+		{3DD248A6-B25F-47C2-832F-92347A66769D} = {4E08C767-B19B-4BCF-9B32-EF7AA60B996D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4EF2E0DD-7B0C-4EF3-925B-7246D342A8EB}
