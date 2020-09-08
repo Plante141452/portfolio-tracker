@@ -1,12 +1,12 @@
-﻿using System;
+﻿using PortfolioTracker.DataAccess;
+using PortfolioTracker.DataAccess.Interfaces;
+using PortfolioTracker.IexClient;
+using PortfolioTracker.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PortfolioTracker.DataAccess;
-using PortfolioTracker.DataAccess.Interfaces;
-using PortfolioTracker.IexClient;
-using PortfolioTracker.Models;
 
 namespace PortfolioTracker.Client
 {
@@ -43,6 +43,11 @@ namespace PortfolioTracker.Client
             })));
 
             return histories.ToList();
+        }
+
+        public Task<List<dynamic>> GetMetrics(List<string> quoteSymbols)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<List<PortfolioHistoryPeriod>> GetPortfolioHistory(List<string> symbols)

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using PortfolioTracker.DataAccess.DataTypes;
 using PortfolioTracker.DataAccess.Interfaces;
 using PortfolioTracker.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PortfolioTracker.DataAccess
 {
@@ -25,6 +25,9 @@ namespace PortfolioTracker.DataAccess
 
         private const string QuoteData = "quote_data";
         private const string StockHistoryData = "stock_history_data";
+        private const string StockMetricData = "stock_metric_data";
+
+        #region Quotes
 
         public async Task<List<Quote>> GetQuotes()
         {
@@ -86,6 +89,10 @@ namespace PortfolioTracker.DataAccess
             }
         }
 
+        #endregion
+
+        #region History
+
         public async Task<StockHistory> GetHistory(string symbol)
         {
             var collection = _mongoWrapper.StockDatabase.GetCollection<StockHistoryData>(StockHistoryData);
@@ -128,5 +135,60 @@ namespace PortfolioTracker.DataAccess
                 await collection.UpdateOneAsync(filter, update);
             }
         }
+
+        #endregion
+
+        #region Metrics
+
+        public async Task<StockMetrics> GetMetrics(string symbol)
+        {
+            var collection = _mongoWrapper.StockDatabase.GetCollection<StockMetricsData>(StockMetricData);
+            FilterDefinition<StockMetricsData> filter = Builders<StockMetricsData>.Filter.Eq(s => s.Symbol, symbol);
+            var filteredData = await collection.FindAsync(filter);
+            var data = await filteredData.FirstOrDefaultAsync();
+            if (data == null)
+                return null;
+
+            return data;
+        }
+
+        public async Task SaveMetrics(StockMetrics metrics)
+        {
+            var collection = _mongoWrapper.StockDatabase.GetCollection<StockMetricsData>(StockMetricData);
+
+            FilterDefinition<StockMetricsData> filter = Builders<StockMetricsData>.Filter.Eq(s => s.Symbol, metrics.Symbol);
+            var filteredData = await collection.FindAsync(filter);
+
+            var existing = filteredData.FirstOrDefault();
+
+            if (existing == null)
+            {
+                var data = new StockMetricsData
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Symbol = metrics.Symbol,
+                    RsiUpdatedDate = metrics.RsiUpdatedDate,
+                    RsiScore = metrics.RsiScore,
+                    MacdUpdatedDate = metrics.MacdUpdatedDate,
+                    MacdScore = metrics.MacdScore,
+                    OverallScore = metrics.OverallScore
+                };
+
+                await collection.InsertOneAsync(data);
+            }
+            else
+            {
+                UpdateDefinition<StockMetricsData> update = Builders<StockMetricsData>.Update
+                    .Set(s => s.RsiUpdatedDate, metrics.RsiUpdatedDate)
+                    .Set(s => s.RsiScore, metrics.RsiScore)
+                    .Set(s => s.MacdUpdatedDate, metrics.MacdUpdatedDate)
+                    .Set(s => s.MacdScore, metrics.MacdScore)
+                    .Set(s => s.OverallScore, metrics.OverallScore);
+
+                await collection.UpdateOneAsync(filter, update);
+            }
+        }
+
+        #endregion
     }
 }

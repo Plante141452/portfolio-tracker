@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PortfolioTracker.DataAccess.DataTypes;
 using PortfolioTracker.Models;
 
 namespace PortfolioTracker.DataAccess.Interfaces
@@ -10,5 +11,7 @@ namespace PortfolioTracker.DataAccess.Interfaces
         Task SaveQuotes(List<Quote> quotes);
         Task<StockHistory> GetHistory(string symbol);
         Task SaveHistory(StockHistory history);
+        Task<StockMetrics> GetMetrics(string symbol);
+        Task SaveMetrics(StockMetrics metrics);
     }
 }

@@ -6,7 +6,7 @@ namespace PortfolioTracker.Models
     {
         public DateTimeOffset ClosingDate { get; set; }
         public long Volume { get; set; }
-        public decimal AdjustedClose { get; set; }
-        public decimal AdjustedPercentChanged { get; set; }
+        public double AdjustedClose { get; set; }
+        public double AdjustedPercentChanged { get; set; }
     }
 }

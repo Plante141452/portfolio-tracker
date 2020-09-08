@@ -1,9 +1,3 @@
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.ServiceBus;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using PortfolioTracker.Client;
-using PortfolioTracker.Models;
 using System;
 using System.Threading.Tasks;
 

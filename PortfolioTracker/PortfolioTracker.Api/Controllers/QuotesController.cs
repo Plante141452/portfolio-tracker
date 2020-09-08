@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using PortfolioTracker.Client;
+using PortfolioTracker.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using PortfolioTracker.Client;
-using PortfolioTracker.Models;
 
 namespace PortfolioTracker.Api.Controllers
 {
@@ -34,7 +34,7 @@ namespace PortfolioTracker.Api.Controllers
                 catch (Exception ex)
                 {
                     ret.Success = false;
-                    ret.Messages = new List<ReturnMessage> {new ReturnMessage { MessageType = MessageTypeEnum.Error, Message = ex.Message} };
+                    ret.Messages = new List<ReturnMessage> { new ReturnMessage { MessageType = MessageTypeEnum.Error, Message = ex.Message } };
                 }
 
                 return ret;

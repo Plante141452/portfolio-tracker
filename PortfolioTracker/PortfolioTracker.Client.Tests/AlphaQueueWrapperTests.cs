@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NUnit.Framework;
+using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
 
 namespace PortfolioTracker.Client.Tests
 {
@@ -12,7 +10,7 @@ namespace PortfolioTracker.Client.Tests
         public async Task Test()
         {
             AlphaQueueWrapper wrapper = new AlphaQueueWrapper();
-            
+
             await wrapper.AlphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateWeeklyEvent, Content = "MSFT" });
             await wrapper.AlphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateWeeklyEvent, Content = "SPY" });
             await wrapper.AlphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateWeeklyEvent, Content = "QQQ" });
@@ -22,6 +20,17 @@ namespace PortfolioTracker.Client.Tests
             await wrapper.AlphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateWeeklyEvent, Content = "V" });
 
             wrapper.StartQueueListener();
+        }
+        [Test]
+        public async Task Test2()
+        {
+            AlphaQueueWrapper wrapper = new AlphaQueueWrapper();
+
+            await wrapper.AlphaQueue.QueueMessage(new QueueMessage { EventType = AlphaQueueWrapper.UpdateMetricsEvent, Content = "QCOM" });
+
+            wrapper.StartQueueListener();
+
+            Thread.Sleep(120000);
         }
     }
 }

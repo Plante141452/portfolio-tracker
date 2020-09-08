@@ -4,9 +4,9 @@ namespace PortfolioTracker.Logic.Models
 {
     public class RebalancePercentageItem : RebalanceItem
     {
-        public decimal DesiredFactor { get; set; }
-        public decimal CurrentFactor { get; set; }
+        public double DesiredFactor { get; set; }
+        public double CurrentFactor { get; set; }
         public int EndAmount { get; set; }
-        public decimal FactorDifference => Math.Abs(DesiredFactor - CurrentFactor);
+        public double FactorDifference => Math.Abs(DesiredFactor - CurrentFactor);
     }
 }

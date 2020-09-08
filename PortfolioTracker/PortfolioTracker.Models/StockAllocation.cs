@@ -4,23 +4,24 @@ namespace PortfolioTracker.Models
 {
     public class StockAllocation
     {
-        private decimal _desiredAmount;
+        private double _desiredAmount;
         public string Symbol { get; set; }
         public AllocationTypeEnum DesiredAmountType { get; set; }
 
-        public decimal DesiredAmount
+        public double DesiredAmount
         {
             get => _desiredAmount;
             set
             {
                 _desiredAmount = value;
-                MinAmount = value * .75m;
-                MaxAmount = value * 1.25m;
+                MinAmount = value * .75;
+                MaxAmount = value * 1.25;
             }
         }
 
-        public decimal MinAmount { get; private set; }
-        public decimal MaxAmount { get; private set; }
+        public double MinAmount { get; private set; }
+        public double MaxAmount { get; private set; }
         public int CurrentShares { get; set; }
+        public double PurchaseRange { get; set; }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System;
+﻿using PortfolioTracker.AlphaClient.Interfaces;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks;
-using PortfolioTracker.AlphaClient.Interfaces;
 
 namespace PortfolioTracker.AlphaClient
 {
@@ -20,7 +19,7 @@ namespace PortfolioTracker.AlphaClient
             _clientFactory = clientFactory;
         }
 
-        public async Task<T> Execute<T>(Func<AlphaVantageStocksClient, Task<T>> exec)
+        public async Task<T> Execute<T>(Func<ThreeFourteen.AlphaVantage.AlphaVantage, Task<T>> exec)
         {
             var client = _clientFactory.GetClient();
 

@@ -1,12 +1,11 @@
-﻿using PortfolioTracker.AlphaClient.AlphaVantage.Net.AlphaVantage.Net.Stocks;
-using PortfolioTracker.AlphaClient.Interfaces;
-using SharpCompress;
+﻿using PortfolioTracker.AlphaClient.Interfaces;
+using System;
 
 namespace PortfolioTracker.AlphaClient
 {
     public class AlphaVantageStocksClientFactory : IAlphaVantageStocksClientFactory
     {
-        private readonly Lazy<AlphaVantageStocksClient> _clientLazy;
+        private readonly Lazy<ThreeFourteen.AlphaVantage.AlphaVantage> _clientLazy;
 
         public AlphaVantageStocksClientFactory()
             : this(new ApiKeyProvider())
@@ -15,10 +14,11 @@ namespace PortfolioTracker.AlphaClient
 
         public AlphaVantageStocksClientFactory(IApiKeyProvider apiKeyProvider)
         {
-            _clientLazy = new Lazy<AlphaVantageStocksClient>(() => new AlphaVantageStocksClient(apiKeyProvider.AlphaVantageKey));
+            var apiKey = apiKeyProvider.AlphaVantageKey;
+            _clientLazy = new Lazy<ThreeFourteen.AlphaVantage.AlphaVantage>(() => new ThreeFourteen.AlphaVantage.AlphaVantage(apiKey));
         }
 
-        public AlphaVantageStocksClient GetClient()
+        public ThreeFourteen.AlphaVantage.AlphaVantage GetClient()
         {
             return _clientLazy.Value;
         }

@@ -1,5 +1,5 @@
-﻿using System;
-using PortfolioTracker.Client;
+﻿using PortfolioTracker.Client;
+using System;
 
 namespace PortfolioTracker.StockEventListener
 {

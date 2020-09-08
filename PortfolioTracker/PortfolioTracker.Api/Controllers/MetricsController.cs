@@ -10,26 +10,26 @@ namespace PortfolioTracker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StocksController : ControllerBase
+    public class MetricsController : ControllerBase
     {
         private readonly IStockApiWrapper _stockApiWrapper;
 
-        public StocksController()
+        public MetricsController()
         {
             _stockApiWrapper = new StockApiWrapper();
         }
 
         // GET api/values/5
         [HttpGet]
-        public async Task<ActionResult<ReturnObject<List<StockHistory>>>> Get(string symbols)
+        public async Task<ActionResult<ReturnObject<List<dynamic>>>> Get(string symbols)
         {
             {
-                var ret = new ReturnObject<List<StockHistory>> { Success = true };
+                var ret = new ReturnObject<List<dynamic>> { Success = true };
 
                 try
                 {
                     var quoteSymbols = symbols.Split(',').ToList();
-                    ret.Data = await _stockApiWrapper.GetHistory(quoteSymbols);
+                    ret.Data = await _stockApiWrapper.GetMetrics(quoteSymbols);
                 }
                 catch (Exception ex)
                 {

@@ -8,6 +8,7 @@
     <PackageReference Include="JetBrains.Annotations" Version="10.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="1.1.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="ThreeFourteen.AlphaVantage" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>

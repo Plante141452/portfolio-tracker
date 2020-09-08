@@ -4,6 +4,6 @@ namespace PortfolioTracker.Logic.Models
 {
     public class RebalanceItem : StockAllocation
     {
-        public decimal Price { get; set; }
+        public double Price { get; set; }
     }
 }

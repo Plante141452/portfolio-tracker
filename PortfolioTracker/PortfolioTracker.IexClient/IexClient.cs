@@ -1,7 +1,7 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RestSharp;
 
 namespace PortfolioTracker.IexClient
 {
@@ -116,8 +116,8 @@ namespace PortfolioTracker.IexClient
     public class IexQuoteContract
     {
         public string symbol { get; set; }
-        public decimal change { get; set; }
-        public decimal latestPrice { get; set; }
+        public double change { get; set; }
+        public double latestPrice { get; set; }
         public DateTimeOffset latestUpdate { get; set; }
     }
 

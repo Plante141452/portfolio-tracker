@@ -1,7 +1,7 @@
-﻿using System;
+﻿using PortfolioTracker.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using PortfolioTracker.Models;
 
 namespace PortfolioTracker.Logic
 {
@@ -52,7 +52,7 @@ namespace PortfolioTracker.Logic
                 foreach (var stock in period.Stocks)
                 {
                     var lastStockPeriodData = lastPeriod.Stocks.First(s => s.Symbol == stock.Symbol).PeriodData;
-                    if (lastStockPeriodData.AdjustedPercentChanged > .0001m)
+                    if (lastStockPeriodData.AdjustedPercentChanged > .0001)
                         stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose / lastStockPeriodData.AdjustedPercentChanged;
                     else
                         stock.PeriodData.AdjustedClose = lastStockPeriodData.AdjustedClose;

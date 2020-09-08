@@ -1,11 +1,11 @@
-﻿using System;
+﻿using PortfolioTracker.Logic.Models;
+using PortfolioTracker.Models;
+using PortfolioTracker.Models.Enums;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PortfolioTracker.Logic.Models;
-using PortfolioTracker.Models;
-using PortfolioTracker.Models.Enums;
 
 namespace PortfolioTracker.Logic
 {
@@ -101,7 +101,7 @@ namespace PortfolioTracker.Logic
                     DesiredAmountType = AllocationTypeEnum.StockAmount
                 }).ToList();
 
-                decimal cashOnHand = dataSet.InitialInvestment;
+                double cashOnHand = dataSet.InitialInvestment;
                 foreach (var period in dataSet.History)
                 {
                     var quotes = period.Stocks.Select(s => new Quote
@@ -138,7 +138,7 @@ namespace PortfolioTracker.Logic
                     }
                 }
 
-                decimal finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
+                double finalPortfolioValue = cashOnHand - dataSet.CashInfluxAmount;
                 var lastPeriod = dataSet.History.Last();
 
                 foreach (var allocation in currentAllocations)
@@ -168,6 +168,7 @@ namespace PortfolioTracker.Logic
                 CurrentShares = a.CurrentShares,
                 DesiredAmountType = a.DesiredAmountType,
                 DesiredAmount = a.DesiredAmount,
+                PurchaseRange = a.PurchaseRange,
                 Price = dataSet.Quotes.First(q => string.Equals(q.Symbol, a.Symbol, StringComparison.InvariantCultureIgnoreCase)).Price
             }).ToList();
 
@@ -256,7 +257,7 @@ namespace PortfolioTracker.Logic
                     break;
 
                 var factorToUse = quickRebalance
-                    ? availableFactors.Where(f => f.Price * 1.02m < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
+                    ? availableFactors.Where(f => f.Price * (1 + f.PurchaseRange) < amountRemaining).OrderByDescending(f => f.FactorDifference).FirstOrDefault()
                     : availableFactors.Aggregate((f1, f2) =>
                     {
                         bool buyingF1 = f1.CurrentShares >= f1.EndAmount;
@@ -273,8 +274,8 @@ namespace PortfolioTracker.Logic
                         var f1Max = f1.MaxAmount / idealTotalFactor;
                         var f2Max = f2.MaxAmount / idealTotalFactor;
 
-                        var f1Price = f1.Price * (buyingF1 ? 1.02m : .96m);
-                        var f2Price = f2.Price * (buyingF2 ? 1.02m : .96m);
+                        var f1Price = f1.Price * (buyingF1 ? (1 + f1.PurchaseRange) : (1 - f1.PurchaseRange));
+                        var f2Price = f2.Price * (buyingF2 ? (1 + f2.PurchaseRange) : (1 - f2.PurchaseRange));
                         var f1Adjusted = ((f1.EndAmount + 1) * f1Price) / portfolioValue;
                         var f2Adjusted = ((f2.EndAmount + 1) * f2Price) / portfolioValue;
 

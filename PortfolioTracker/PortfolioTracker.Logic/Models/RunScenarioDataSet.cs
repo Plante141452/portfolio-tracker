@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using PortfolioTracker.Models;
+﻿using PortfolioTracker.Models;
 using PortfolioTracker.Models.Enums;
+using System.Collections.Generic;
 
 namespace PortfolioTracker.Logic.Models
 {
@@ -8,9 +8,9 @@ namespace PortfolioTracker.Logic.Models
     {
         public List<Portfolio> Portfolios { get; set; }
         public List<PortfolioHistoryPeriod> History { get; set; }
-        public decimal InitialInvestment { get; set; }
+        public double InitialInvestment { get; set; }
 
         public CadenceTypeEnum CashInfluxCadence { get; set; }
-        public decimal CashInfluxAmount { get; set; }
+        public double CashInfluxAmount { get; set; }
     }
 }
